@@ -1,0 +1,162 @@
+<style>@import url("https://fonts.googleapis.com/css2?family=Aclonica&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+:root { --font-size: 14px;
+
+/* Portfolio-lite Color Palette */ --color-bg: #0d1117; --color-surface: #161b22; --color-primary: #14b5ff; --color-secondary: #f78166; --color-text: whitesmoke; --color-muted: #8b949e;
+
+/* Link Colors */ --color-link: #7652f5; --color-link-hover: #00e8ff;
+
+/* Math equation colors */ --color-math: #00f5db;
+
+/* Gradients */ --gradient-light-to-dark-blue: linear-gradient(to right bottom, #00e8ff, #14b5ff, #3a98ff, #0070eb); --gradient-cyan-to-blue: linear-gradient(130deg, #00ffee, #0a95eb); --gradient-green-to-blue: linear-gradient(#22f792, #27aaff);
+--gradient-blue-to-purple: linear-gradient(to right bottom, #00e8ff, #14b5ff, #5280ff, #7952f5); --gradient-blue-to-purple-transparent: linear-gradient(to right bottom, rgba(0, 232, 255, 0.2), rgba(20, 181,255, 0.2), rgba(82, 128, 255, 0.2), rgba(121, 82, 245, 0.2));
+
+/* Icon Gradients */ --tech-icon-gradient: linear-gradient(145deg, rgba(34, 247, 147, 0.8), rgba(10, 149, 235, 0.8)); --stem-icon-gradient: linear-gradient(145deg, rgba(169, 34, 247, 0.8), rgba(10, 149, 235, 0.8));
+
+/* Typography */ --font-aclonica: 'Aclonica', sans-serif; --font-mono: 'Fira Code', monospace; --font-math: "Times New Roman", "Computer Modern", serif;
+
+/* Borders & Radius */ --radius-sx: 4px; --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 50px;
+
+/* Shadows */ --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2); --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3); --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4); --shadow-header: 0 2px 10px rgba(0, 0, 0, 0.3); --shadow-logo: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+/* Glassmorphism */ --glass-bg: rgba(0, 0, 0, 0.5); --glass-border: rgba(255, 255, 255, 0.1);
+
+/* Original design system variables */ --background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #d4183d; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: transparent; --input-background: var(--color-surface); --switch-background: #cbced4; --font-weight-medium: 500; --font-weight-normal: 400; --ring: var(--color-primary); --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --radius: var(--radius-lg); --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+.dark { /* Light mode overrides */ --color-bg: #f8f9fa; --color-surface: #ffffff; --color-text: #1a1d23; --color-muted: #6c757d; --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(0, 0, 0, 0.1);
+
+--background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #dc3545; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: var(--color-surface); --ring: var(--color-primary); --font-weight-medium: 500; --font-weight-normal: 400; --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground); --color-border: var(--border); --color-input: var(--input); --color-input-background: var(--input-background); --color-switch-background: var(--switch-background); --color-ring: var(--ring); --color-chart-1: var(--chart-1); --color-chart-2: var(--chart-2); --color-chart-3: var(--chart-3); --color-chart-4: var(--chart-4); --color-chart-5: var(--chart-5); --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px); --color-sidebar: var(--sidebar); --color-sidebar-foreground: var(--sidebar-foreground); --color-sidebar-primary: var(--sidebar-primary); --color-sidebar-primary-foreground: var(--sidebar-primary-foreground); --color-sidebar-accent: var(--sidebar-accent); --color-sidebar-accent-foreground: var(--sidebar-accent-foreground); --color-sidebar-border: var(--sidebar-border); --color-sidebar-ring: var(--sidebar-ring); }
+
+@layer base {
+
+{ @apply border-border outline-ring/50; box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-aclonica); }
+html, body { margin: 0; padding: 0; transition: all 0.4s ease-in-out; font-family: var(--font-aclonica); }
+
+body { @apply bg-background text-foreground; } }
+
+/* Portfolio-lite Glass Card System */ .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+
+.glass-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg); border-color: var(--color-primary); }
+
+/* Portfolio-lite Button System */ .portfolio-btn { background-image: var(--gradient-light-to-dark-blue); box-shadow: 0 4px 15px 0 rgba(56, 152, 255, 0.5); font-weight: 700; text-align: center; border: none; background-size: 300% 100%; border-radius: var(--radius-xl); transition: all 0.4s ease-in-out; position: relative; z-index: 1; color: white; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); cursor: pointer; letter-spacing: 0.5px; }
+
+.portfolio-btn:hover { background-position: 100% 0; filter: brightness(1.1); }
+
+.portfolio-btn-secondary { background-image: var(--gradient-blue-to-purple) !important; box-shadow: 0 4px 15px 0 rgba(20, 165, 255, 0.6); color: white !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* Improved contrast for text on bright backgrounds / .glass-card [style="background: var(--gradient-green-to-blue)"] { color: #1a1d23 !important; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); }
+
+.glass-card [style*="background: var(--gradient-green-to-blue)"] .lucide { color: #1a1d23 !important; }
+
+/* Gradient Text Effects - Dark Mode */ .gradient-text-primary { background: var(--gradient-light-to-dark-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-secondary { background: var(--gradient-cyan-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-accent { background: var(--gradient-green-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Gradient Text Effects - Light Mode (softer, more muted for reduced eye strain) */ .dark .gradient-text-primary { background: linear-gradient(145deg, #6b46c1, #4a90e2, #5b7ec8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-secondary { background: linear-gradient(145deg, #8b5cf6, #6366f1, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-accent { background: linear-gradient(145deg, #4f7ab8, #3b82f6, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+/**
+
+Base typography. This is not applied to elements which have an ancestor with a Tailwind text class. / @layer base { :where(:not(:has([class=" text-"]), :not(:has([class^="text-"])))) { h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h2 { font-size: var(--text-xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h3 { font-size: var(--text-lg); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+p { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); }
+
+label { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+input { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); } } }
+
+html { font-size: var(--font-size); }
+
+Hodgkin-Huxley & ODE Analysis Platform
+
+🧠 Hodgkin-Huxley Model
+
+
+📊 ODE Phase Analysis
+
+Hodgkin-Huxley Neuron Model
+Educational Content Area
+This section will contain information about the Hodgkin-Huxley model, its biological significance, and mathematical formulation.
+
+Model Parameters
+Membrane Properties
+
+Membrane Capacitance (μF/cm²)
+
+0.50
+2.00
+Maximum Conductances
+
+Sodium Conductance (mS/cm²)
+
+50
+200
+Potassium Conductance (mS/cm²)
+
+10
+50
+Leak Conductance (mS/cm²)
+
+0.10
+1.00
+Reversal Potentials
+
+Sodium Reversal Potential (mV)
+
+40
+70
+Potassium Reversal Potential (mV)
+
+-100
+-60
+Leak Reversal Potential (mV)
+
+-70.00
+-50.00
+Stimulation
+
+Applied Current (μA/cm²)
+
+-50
+100
+Simulation Duration (ms)
+
+10
+200
+
+KeyError: 'axes.grid.alpha is not a valid rc parameter (see rcParams.keys() for a list of valid parameters)'
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/app.py", line 382, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 143, in main
+    hodgkin_huxley_interface()
+File "/home/runner/workspace/app.py", line 202, in hodgkin_huxley_interface
+    setup_plot_theme()
+File "/home/runner/workspace/plot_styling.py", line 41, in setup_plot_theme
+    mpl.rcParams.update({
+File "<frozen _collections_abc>", line 949, in update
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/matplotlib/__init__.py", line 777, in __setitem__
+    raise KeyError(

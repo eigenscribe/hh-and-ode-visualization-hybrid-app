@@ -55,7 +55,6 @@ def setup_plot_theme():
         'axes.spines.right': False,
         'axes.linewidth': 1.5,
         'axes.grid': True,
-        'axes.grid.alpha': 0.3,
         'axes.labelsize': 12,
         'axes.titlesize': 14,
         'axes.titleweight': 'bold',
