@@ -182,6 +182,10 @@ def hodgkin_huxley_interface():
         I_ext = st.slider("Applied Current (μA/cm²)", -50, 100, 10, 1)
         duration = st.slider("Simulation Duration (ms)", 10, 200, 50, 5)
         
+        st.markdown("**Threshold Detection**")
+        V_threshold = st.slider("Firing Threshold (mV)", -70.0, -40.0, -55.0, 0.5)
+        show_threshold = st.checkbox("Show threshold line", value=True)
+        
         simulate_button = st.button("🚀 Run Simulation", key="hh_simulate")
         st.markdown('</div>', unsafe_allow_html=True)
     
@@ -196,6 +200,8 @@ def hodgkin_huxley_interface():
             with st.spinner("Running Hodgkin-Huxley simulation..."):
                 results = hh_sim.simulate(I_ext, duration)
                 st.session_state.hh_results = results
+                st.session_state.V_threshold = V_threshold
+                st.session_state.show_threshold = show_threshold
         
         if 'hh_results' in st.session_state:
             results = st.session_state.hh_results
@@ -205,10 +211,38 @@ def hodgkin_huxley_interface():
             
             # Voltage trace
             fig1, ax1 = plt.subplots(figsize=(10, 4))
-            ax1.plot(results['t'], results['V'], color=get_theme_colors()['primary'], linewidth=2)
+            ax1.plot(results['t'], results['V'], color=get_theme_colors()['primary'], linewidth=2, label='Membrane Potential')
+            
+            # Add threshold line if enabled
+            if st.session_state.get('show_threshold', True):
+                threshold = st.session_state.get('V_threshold', -55.0)
+                ax1.axhline(y=threshold, color=get_theme_colors()['secondary'], 
+                           linestyle='--', linewidth=2, alpha=0.8, label=f'Threshold ({threshold} mV)')
+                
+                # Detect spikes (threshold crossings)
+                V = results['V']
+                spike_times = []
+                for i in range(1, len(V)):
+                    if V[i-1] < threshold and V[i] >= threshold:
+                        spike_times.append(results['t'][i])
+                
+                # Mark spike times
+                for spike_t in spike_times:
+                    ax1.axvline(x=spike_t, color=get_theme_colors()['accent'], 
+                               linestyle=':', linewidth=1, alpha=0.5)
+                
+                # Display spike count
+                if spike_times:
+                    ax1.text(0.02, 0.98, f'Spikes: {len(spike_times)}', 
+                            transform=ax1.transAxes, fontfamily='Aclonica',
+                            verticalalignment='top', fontsize=11,
+                            bbox=dict(boxstyle='round', facecolor=get_theme_colors()['surface'], 
+                                    alpha=0.8, edgecolor=get_theme_colors()['primary']))
+            
             ax1.set_xlabel('Time (ms)', fontfamily='Aclonica')
             ax1.set_ylabel('Membrane Potential (mV)', fontfamily='Aclonica')
             ax1.set_title('Membrane Potential vs Time', fontfamily='Aclonica', fontweight='bold')
+            ax1.legend(prop={'family': 'Aclonica', 'size': 9}, loc='upper right')
             ax1.grid(True, alpha=0.3)
             st.pyplot(fig1)
             plt.close()
