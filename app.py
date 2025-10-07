@@ -174,7 +174,7 @@ def hodgkin_huxley_interface():
         st.markdown("**Reversal Potentials**")
         E_Na = st.slider("Sodium Reversal Potential (mV)", 40, 70, 50, 1)
         E_K = st.slider("Potassium Reversal Potential (mV)", -100, -60, -77, 1)
-        E_L = st.slider("Leak Reversal Potential (mV)", -70, -50, -54.387, 0.1)
+        E_L = st.slider("Leak Reversal Potential (mV)", -70.0, -50.0, -54.387, 0.1)
         
         st.markdown("**Stimulation**")
         I_ext = st.slider("Applied Current (μA/cm²)", -50, 100, 10, 1)
