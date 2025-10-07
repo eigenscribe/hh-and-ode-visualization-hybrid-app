@@ -179,8 +179,27 @@ def hodgkin_huxley_interface():
         E_L = st.slider("Leak Reversal Potential (mV)", -70.0, -50.0, -54.387, 0.1)
         
         st.markdown("**Stimulation**")
-        I_ext = st.slider("Applied Current (μA/cm²)", -50, 100, 10, 1)
-        duration = st.slider("Simulation Duration (ms)", 10, 200, 50, 5)
+        stim_mode = st.radio("Stimulus Type", ["Constant Current", "Pulse Train"], horizontal=True)
+        
+        if stim_mode == "Constant Current":
+            I_ext = st.slider("Applied Current (μA/cm²)", -50, 100, 10, 1)
+            duration = st.slider("Simulation Duration (ms)", 10, 200, 50, 5)
+            pulse_params = None
+        else:
+            duration = st.slider("Total Duration (ms)", 50, 500, 200, 10)
+            n_pulses = st.slider("Number of Pulses", 1, 10, 3, 1)
+            pulse_start = st.slider("First Pulse Start (ms)", 0.0, 50.0, 10.0, 1.0)
+            pulse_duration = st.slider("Pulse Duration (ms)", 1.0, 50.0, 5.0, 1.0)
+            pulse_interval = st.slider("Inter-Pulse Interval (ms)", 5.0, 100.0, 30.0, 5.0)
+            pulse_amplitude = st.slider("Pulse Amplitude (μA/cm²)", -50, 100, 20, 1)
+            I_ext = 0  # baseline current
+            pulse_params = {
+                'n_pulses': n_pulses,
+                'start': pulse_start,
+                'duration': pulse_duration,
+                'interval': pulse_interval,
+                'amplitude': pulse_amplitude
+            }
         
         st.markdown("**Threshold Detection**")
         V_threshold = st.slider("Firing Threshold (mV)", -70.0, -40.0, -55.0, 0.5)
@@ -198,7 +217,13 @@ def hodgkin_huxley_interface():
             
             # Run simulation
             with st.spinner("Running Hodgkin-Huxley simulation..."):
-                results = hh_sim.simulate(I_ext, duration)
+                if pulse_params:
+                    results = hh_sim.simulate_pulse_train(pulse_params, duration)
+                    st.session_state.pulse_params = pulse_params
+                else:
+                    results = hh_sim.simulate(I_ext, duration)
+                    st.session_state.pulse_params = None
+                
                 st.session_state.hh_results = results
                 st.session_state.V_threshold = V_threshold
                 st.session_state.show_threshold = show_threshold
@@ -209,8 +234,28 @@ def hodgkin_huxley_interface():
             # Setup plot theme
             setup_plot_theme()
             
-            # Voltage trace
-            fig1, ax1 = plt.subplots(figsize=(10, 4))
+            # Voltage trace with stimulus visualization
+            if st.session_state.get('pulse_params'):
+                # Create subplots for pulse train visualization
+                fig1, (ax1a, ax1) = plt.subplots(2, 1, figsize=(10, 6), 
+                                                gridspec_kw={'height_ratios': [1, 3]}, sharex=True)
+                
+                # Plot stimulus pulses
+                pulse_params = st.session_state.get('pulse_params')
+                for pulse_start, pulse_end in results.get('pulse_times', []):
+                    ax1a.axvspan(pulse_start, pulse_end, 
+                                color=get_theme_colors()['chart_5'], alpha=0.6)
+                    ax1a.hlines(results.get('pulse_amplitude', 0), pulse_start, pulse_end,
+                              color=get_theme_colors()['chart_5'], linewidth=3)
+                
+                ax1a.set_ylabel('I (μA/cm²)', fontfamily='Aclonica', fontsize=10)
+                ax1a.set_title('Stimulus Current', fontfamily='Aclonica', fontweight='bold', fontsize=12)
+                ax1a.grid(True, alpha=0.3)
+                ax1a.set_ylim(-5, results.get('pulse_amplitude', 20) + 10)
+            else:
+                fig1, ax1 = plt.subplots(figsize=(10, 4))
+            
+            # Plot voltage
             ax1.plot(results['t'], results['V'], color=get_theme_colors()['primary'], linewidth=2, label='Membrane Potential')
             
             # Add threshold line if enabled
@@ -244,6 +289,8 @@ def hodgkin_huxley_interface():
             ax1.set_title('Membrane Potential vs Time', fontfamily='Aclonica', fontweight='bold')
             ax1.legend(prop={'family': 'Aclonica', 'size': 9}, loc='upper right')
             ax1.grid(True, alpha=0.3)
+            
+            plt.tight_layout()
             st.pyplot(fig1)
             plt.close()
             

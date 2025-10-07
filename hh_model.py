@@ -129,6 +129,64 @@ class HodgkinHuxleySimulator:
             'I_L': I_L
         }
     
+    def simulate_pulse_train(self, pulse_params, total_duration, dt=0.01):
+        """
+        Run HH simulation with pulse train stimulus
+        
+        Parameters:
+        - pulse_params: dict with 'n_pulses', 'start', 'duration', 'interval', 'amplitude'
+        - total_duration: total simulation time (ms)
+        - dt: time step (ms)
+        
+        Returns:
+        - Dictionary with time series data and pulse timing info
+        """
+        # Time vector
+        t_span = (0, total_duration)
+        t_eval = np.arange(0, total_duration + dt, dt)
+        
+        # Initial conditions (resting state)
+        V_rest = -65  # mV
+        n_inf = self.alpha_n(V_rest) / (self.alpha_n(V_rest) + self.beta_n(V_rest))
+        m_inf = self.alpha_m(V_rest) / (self.alpha_m(V_rest) + self.beta_m(V_rest))
+        h_inf = self.alpha_h(V_rest) / (self.alpha_h(V_rest) + self.beta_h(V_rest))
+        
+        y0 = [V_rest, n_inf, m_inf, h_inf]
+        
+        # Create pulse train current function
+        def pulse_train_current(t):
+            I = 0
+            for i in range(pulse_params['n_pulses']):
+                pulse_start = pulse_params['start'] + i * pulse_params['interval']
+                pulse_end = pulse_start + pulse_params['duration']
+                if pulse_start <= t <= pulse_end:
+                    I = pulse_params['amplitude']
+                    break
+            return I
+        
+        # Solve ODE with pulse train
+        sol = solve_ivp(
+            lambda t, y: self.hh_derivatives(t, y, pulse_train_current(t)),
+            t_span, y0, t_eval=t_eval, method='RK45', rtol=1e-6
+        )
+        
+        # Store pulse timing for visualization
+        pulse_times = []
+        for i in range(pulse_params['n_pulses']):
+            pulse_start = pulse_params['start'] + i * pulse_params['interval']
+            pulse_end = pulse_start + pulse_params['duration']
+            pulse_times.append((pulse_start, pulse_end))
+        
+        return {
+            't': sol.t,
+            'V': sol.y[0],
+            'n': sol.y[1],
+            'm': sol.y[2],
+            'h': sol.y[3],
+            'pulse_times': pulse_times,
+            'pulse_amplitude': pulse_params['amplitude']
+        }
+    
     def nullclines(self, V_range=(-100, 50), n_points=1000):
         """Compute V and n nullclines for phase plane analysis"""
         V = np.linspace(V_range[0], V_range[1], n_points)
