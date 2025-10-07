@@ -18,22 +18,24 @@ def inject_custom_css():
     with open("attached_assets/globals_1759862306955.css", "r") as f:
         css = f.read()
     
-    # Additional Streamlit-specific styling
-    streamlit_css = """
+    # Additional Streamlit-specific styling combined with imported CSS
+    streamlit_css = f"""
     <style>
-    .main {
+    {css}
+    
+    .main {{
         background: var(--color-bg);
         color: var(--color-text);
-    }
+    }}
     
-    .stTabs [data-baseweb="tab-list"] {
+    .stTabs [data-baseweb="tab-list"] {{
         background: var(--color-surface);
         border-radius: var(--radius-lg);
         padding: 0.5rem;
         margin-bottom: 2rem;
-    }
+    }}
     
-    .stTabs [data-baseweb="tab"] {
+    .stTabs [data-baseweb="tab"] {{
         background: transparent;
         border-radius: var(--radius-md);
         color: var(--color-muted);
@@ -42,15 +44,15 @@ def inject_custom_css():
         padding: 0.75rem 1.5rem;
         margin: 0 0.25rem;
         transition: all 0.3s ease;
-    }
+    }}
     
-    .stTabs [aria-selected="true"] {
+    .stTabs [aria-selected="true"] {{
         background: var(--gradient-light-to-dark-blue) !important;
         color: white !important;
         box-shadow: var(--shadow-md);
-    }
+    }}
     
-    .glass-card {
+    .glass-card {{
         background: var(--glass-bg);
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-lg);
@@ -59,26 +61,26 @@ def inject_custom_css():
         padding: 1.5rem;
         margin: 1rem 0;
         transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
+    }}
     
-    .glass-card:hover {
+    .glass-card:hover {{
         transform: translateY(-2px);
         box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg);
         border-color: var(--color-primary);
-    }
+    }}
     
-    .stSelectbox > div > div {
+    .stSelectbox > div > div {{
         background: var(--input-background);
         border: 1px solid var(--glass-border);
         border-radius: var(--radius-md);
         color: var(--color-text);
-    }
+    }}
     
-    .stSlider > div > div > div {
+    .stSlider > div > div > div {{
         background: var(--gradient-light-to-dark-blue);
-    }
+    }}
     
-    .stButton > button {
+    .stButton > button {{
         background: var(--gradient-light-to-dark-blue);
         border: none;
         border-radius: var(--radius-xl);
@@ -88,23 +90,23 @@ def inject_custom_css():
         padding: 0.75rem 2rem;
         transition: all 0.3s ease;
         box-shadow: 0 4px 15px 0 rgba(56, 152, 255, 0.5);
-    }
+    }}
     
-    .stButton > button:hover {
+    .stButton > button:hover {{
         filter: brightness(1.1);
         transform: translateY(-1px);
-    }
+    }}
     
-    .gradient-text-primary {
+    .gradient-text-primary {{
         background: var(--gradient-light-to-dark-blue);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         font-family: var(--font-aclonica);
         font-weight: 700;
-    }
+    }}
     
-    .content-placeholder {
+    .content-placeholder {{
         background: var(--glass-bg);
         border: 2px dashed var(--glass-border);
         border-radius: var(--radius-lg);
@@ -113,19 +115,19 @@ def inject_custom_css():
         text-align: center;
         color: var(--color-muted);
         font-style: italic;
-    }
+    }}
     
-    h1, h2, h3, h4, h5, h6 {
+    h1, h2, h3, h4, h5, h6 {{
         font-family: var(--font-aclonica) !important;
         color: var(--color-text);
-    }
+    }}
     
-    .math-equation {
+    .math-equation {{
         font-family: "Times New Roman", "Computer Modern", serif !important;
         color: var(--color-math);
-    }
+    }}
     </style>
-    """ + f"<style>{css}</style>"
+    """
     
     st.markdown(streamlit_css, unsafe_allow_html=True)
 
