@@ -164,24 +164,27 @@ def hodgkin_huxley_interface():
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.subheader("Model Parameters")
         
-        # Fixed conductances from Hodgkin & Huxley (1952)
-        g_Na = 120  # mS/cm² - Sodium conductance
-        g_K = 36    # mS/cm² - Potassium conductance
-        g_L = 0.3   # mS/cm² - Leak conductance
+        # Fixed parameters from Hodgkin & Huxley (1952)
+        g_Na = 120      # mS/cm² - Sodium conductance
+        g_K = 36        # mS/cm² - Potassium conductance
+        g_L = 0.3       # mS/cm² - Leak conductance
+        E_Na = 50       # mV - Sodium reversal potential
+        E_K = -77       # mV - Potassium reversal potential
+        E_L = -54.387   # mV - Leak reversal potential
         
         # HH Model Parameters
         st.markdown("**Membrane Properties**")
         C_m = st.slider("Membrane Capacitance (μF/cm²)", 0.5, 2.0, 1.0, 0.1)
         
         st.markdown("**Conductances (Fixed)**")
-        st.text(f"g_Na = {g_Na} mS/cm² (Sodium)")
-        st.text(f"g_K = {g_K} mS/cm² (Potassium)")
-        st.text(f"g_L = {g_L} mS/cm² (Leak)")
+        st.text(f"g_Na = {g_Na} mS/cm²")
+        st.text(f"g_K = {g_K} mS/cm²")
+        st.text(f"g_L = {g_L} mS/cm²")
         
-        st.markdown("**Reversal Potentials**")
-        E_Na = st.slider("Sodium Reversal Potential (mV)", 40, 70, 50, 1)
-        E_K = st.slider("Potassium Reversal Potential (mV)", -100, -60, -77, 1)
-        E_L = st.slider("Leak Reversal Potential (mV)", -70.0, -50.0, -54.387, 0.1)
+        st.markdown("**Reversal Potentials (Fixed)**")
+        st.text(f"E_Na = {E_Na} mV")
+        st.text(f"E_K = {E_K} mV")
+        st.text(f"E_L = {E_L} mV")
         
         st.markdown("**Stimulation**")
         stim_mode = st.radio("Stimulus Type", ["Constant Current", "Pulse Train"], horizontal=True)
