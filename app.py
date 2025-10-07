@@ -164,14 +164,19 @@ def hodgkin_huxley_interface():
         st.markdown('<div class="glass-card">', unsafe_allow_html=True)
         st.subheader("Model Parameters")
         
+        # Fixed conductances from Hodgkin & Huxley (1952)
+        g_Na = 120  # mS/cm² - Sodium conductance
+        g_K = 36    # mS/cm² - Potassium conductance
+        g_L = 0.3   # mS/cm² - Leak conductance
+        
         # HH Model Parameters
         st.markdown("**Membrane Properties**")
         C_m = st.slider("Membrane Capacitance (μF/cm²)", 0.5, 2.0, 1.0, 0.1)
         
-        st.markdown("**Maximum Conductances**")
-        g_Na = st.slider("Sodium Conductance (mS/cm²)", 50, 200, 120, 5)
-        g_K = st.slider("Potassium Conductance (mS/cm²)", 10, 50, 36, 2)
-        g_L = st.slider("Leak Conductance (mS/cm²)", 0.1, 1.0, 0.3, 0.05)
+        st.markdown("**Conductances (Fixed)**")
+        st.text(f"g_Na = {g_Na} mS/cm² (Sodium)")
+        st.text(f"g_K = {g_K} mS/cm² (Potassium)")
+        st.text(f"g_L = {g_L} mS/cm² (Leak)")
         
         st.markdown("**Reversal Potentials**")
         E_Na = st.slider("Sodium Reversal Potential (mV)", 40, 70, 50, 1)
