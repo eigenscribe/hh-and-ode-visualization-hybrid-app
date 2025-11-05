@@ -5,31 +5,31 @@
 :root {
   --font-size: 14px;
   
-  /* Portfolio-lite Color Palette */
+  /* Purple-Cyan Gradient Palette */
   --color-bg: #0d1117; 
   --color-surface: #161b22;
-  --color-primary: #14b5ff; 
-  --color-secondary: #f78166; 
+  --color-primary: #6930c3; 
+  --color-secondary: #80ffdb; 
   --color-text: whitesmoke; 
   --color-muted: #8b949e; 
 
   /* Link Colors */
-  --color-link: #7652f5;
-  --color-link-hover: #00e8ff; 
+  --color-link: #7400b8;
+  --color-link-hover: #56cfe1; 
 
   /* Math equation colors */
-  --color-math: #00f5db;
+  --color-math: #64dfdf;
 
-  /* Gradients */
-  --gradient-light-to-dark-blue: linear-gradient(to right bottom, #00e8ff, #14b5ff, #3a98ff, #0070eb);
-  --gradient-cyan-to-blue: linear-gradient(130deg, #00ffee, #0a95eb);
-  --gradient-green-to-blue: linear-gradient(#22f792, #27aaff);  
-  --gradient-blue-to-purple: linear-gradient(to right bottom, #00e8ff, #14b5ff, #5280ff, #7952f5);
-  --gradient-blue-to-purple-transparent: linear-gradient(to right bottom, rgba(0, 232, 255, 0.2), rgba(20, 181,255, 0.2), rgba(82, 128, 255, 0.2), rgba(121, 82, 245, 0.2));
+  /* Gradients - Keep blue buttons but use purple gradient elsewhere */
+  --gradient-light-to-dark-blue: linear-gradient(to right bottom, #5390d9, #4ea8de, #48bfe3, #56cfe1);
+  --gradient-cyan-to-blue: linear-gradient(130deg, #80ffdb, #48bfe3);
+  --gradient-purple-to-cyan: linear-gradient(#7400b8, #6930c3, #5e60ce, #80ffdb);  
+  --gradient-blue-to-purple: linear-gradient(to right bottom, #7400b8, #6930c3, #5e60ce, #5390d9);
+  --gradient-blue-to-purple-transparent: linear-gradient(to right bottom, rgba(116, 0, 184, 0.2), rgba(105, 48, 195, 0.2), rgba(94, 96, 206, 0.2), rgba(83, 144, 217, 0.2));
 
   /* Icon Gradients */ 
-  --tech-icon-gradient: linear-gradient(145deg, rgba(34, 247, 147, 0.8), rgba(10, 149, 235, 0.8));
-  --stem-icon-gradient: linear-gradient(145deg, rgba(169, 34, 247, 0.8), rgba(10, 149, 235, 0.8));
+  --tech-icon-gradient: linear-gradient(145deg, rgba(128, 255, 219, 0.8), rgba(72, 191, 227, 0.8));
+  --stem-icon-gradient: linear-gradient(145deg, rgba(116, 0, 184, 0.8), rgba(83, 144, 217, 0.8));
 
   /* Typography */ 
   --font-aclonica: 'Aclonica', sans-serif;
@@ -80,9 +80,9 @@
   --ring: var(--color-primary);
   --chart-1: var(--color-primary);
   --chart-2: var(--color-secondary);
-  --chart-3: #22f792;
-  --chart-4: #7652f5;
-  --chart-5: #00f5db;
+  --chart-3: #72efdd;
+  --chart-4: #5e60ce;
+  --chart-5: #48bfe3;
   --radius: var(--radius-lg);
   --sidebar: var(--color-surface);
   --sidebar-foreground: var(--color-text);
@@ -126,9 +126,9 @@
   --font-weight-normal: 400;
   --chart-1: var(--color-primary);
   --chart-2: var(--color-secondary);
-  --chart-3: #22f792;
-  --chart-4: #7652f5;
-  --chart-5: #00f5db;
+  --chart-3: #72efdd;
+  --chart-4: #5e60ce;
+  --chart-5: #48bfe3;
   --sidebar: var(--color-surface);
   --sidebar-foreground: var(--color-text);
   --sidebar-primary: var(--color-primary);
@@ -213,7 +213,7 @@
 
 .glass-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg);
+  box-shadow: 0 12px 40px rgba(105, 48, 195, 0.25), var(--shadow-lg);
   border-color: var(--color-primary);
 }
 
@@ -248,12 +248,12 @@
 }
 
 /* Improved contrast for text on bright backgrounds */
-.glass-card [style*="background: var(--gradient-green-to-blue)"] {
+.glass-card [style*="background: var(--gradient-purple-to-cyan)"] {
   color: #1a1d23 !important;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
 }
 
-.glass-card [style*="background: var(--gradient-green-to-blue)"] .lucide {
+.glass-card [style*="background: var(--gradient-purple-to-cyan)"] .lucide {
   color: #1a1d23 !important;
 }
 
@@ -273,7 +273,7 @@
 }
 
 .gradient-text-accent {
-  background: var(--gradient-green-to-blue);
+  background: var(--gradient-purple-to-cyan);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -281,7 +281,7 @@
 
 /* Gradient Text Effects - Light Mode (softer, more muted for reduced eye strain) */
 .dark .gradient-text-primary {
-  background: linear-gradient(145deg, #6b46c1, #4a90e2, #5b7ec8);
+  background: linear-gradient(145deg, #7400b8, #6930c3, #5e60ce);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -289,7 +289,7 @@
 }
 
 .dark .gradient-text-secondary {
-  background: linear-gradient(145deg, #8b5cf6, #6366f1, #3b82f6);
+  background: linear-gradient(145deg, #48bfe3, #56cfe1, #64dfdf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -297,7 +297,7 @@
 }
 
 .dark .gradient-text-accent {
-  background: linear-gradient(145deg, #4f7ab8, #3b82f6, #0ea5e9);
+  background: linear-gradient(145deg, #7400b8, #5e60ce, #80ffdb);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

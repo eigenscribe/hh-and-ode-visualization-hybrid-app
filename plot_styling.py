@@ -8,26 +8,26 @@ def get_theme_colors():
     return {
         'bg': '#0d1117',
         'surface': '#161b22',
-        'primary': '#14b5ff',
-        'secondary': '#f78166',
+        'primary': '#6930c3',
+        'secondary': '#80ffdb',
         'text': '#f5f5f5',  # whitesmoke
         'muted': '#8b949e',
-        'link': '#7652f5',
-        'link_hover': '#00e8ff',
-        'math': '#00f5db',
-        'accent': '#22f792',
-        'chart_3': '#22f792',
-        'chart_4': '#7652f5',
-        'chart_5': '#00f5db'
+        'link': '#7400b8',
+        'link_hover': '#56cfe1',
+        'math': '#64dfdf',
+        'accent': '#72efdd',
+        'chart_3': '#72efdd',
+        'chart_4': '#5e60ce',
+        'chart_5': '#48bfe3'
     }
 
 def get_gradients():
     """Get gradient definitions matching the CSS theme"""
     return {
-        'light_to_dark_blue': ['#00e8ff', '#14b5ff', '#3a98ff', '#0070eb'],
-        'cyan_to_blue': ['#00ffee', '#0a95eb'],
-        'green_to_blue': ['#22f792', '#27aaff'],
-        'blue_to_purple': ['#00e8ff', '#14b5ff', '#5280ff', '#7952f5']
+        'light_to_dark_blue': ['#5390d9', '#4ea8de', '#48bfe3', '#56cfe1'],
+        'cyan_to_blue': ['#80ffdb', '#48bfe3'],
+        'purple_to_cyan': ['#7400b8', '#6930c3', '#5e60ce', '#80ffdb'],
+        'blue_to_purple': ['#7400b8', '#6930c3', '#5e60ce', '#5390d9']
     }
 
 def setup_plot_theme():
