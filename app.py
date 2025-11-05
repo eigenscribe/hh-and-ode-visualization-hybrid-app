@@ -177,14 +177,14 @@ def hodgkin_huxley_interface():
         C_m = st.slider("Membrane Capacitance (μF/cm²)", 0.5, 2.0, 1.0, 0.1)
         
         st.markdown("**Conductances (Fixed)**")
-        st.text(f"g_Na = {g_Na} mS/cm²")
-        st.text(f"g_K = {g_K} mS/cm²")
-        st.text(f"g_L = {g_L} mS/cm²")
+        st.markdown(f"$g_{{Na}}$ = {g_Na} mS/cm²")
+        st.markdown(f"$g_{{K}}$ = {g_K} mS/cm²")
+        st.markdown(f"$g_{{L}}$ = {g_L} mS/cm²")
         
         st.markdown("**Reversal Potentials (Fixed)**")
-        st.text(f"E_Na = {E_Na} mV")
-        st.text(f"E_K = {E_K} mV")
-        st.text(f"E_L = {E_L} mV")
+        st.markdown(f"$E_{{Na}}$ = {E_Na} mV")
+        st.markdown(f"$E_{{K}}$ = {E_K} mV")
+        st.markdown(f"$E_{{L}}$ = {E_L} mV")
         
         st.markdown("**Stimulation**")
         stim_mode = st.radio("Stimulus Type", ["Constant Current", "Pulse Train"], horizontal=True)
@@ -256,7 +256,7 @@ def hodgkin_huxley_interface():
                     ax1a.hlines(results.get('pulse_amplitude', 0), pulse_start, pulse_end,
                               color=get_theme_colors()['chart_5'], linewidth=3)
                 
-                ax1a.set_ylabel('I (μA/cm²)', fontfamily='Aclonica', fontsize=10)
+                ax1a.set_ylabel(r'$I$ (μA/cm²)', fontfamily='Aclonica', fontsize=10)
                 ax1a.set_title('Stimulus Current', fontfamily='Aclonica', fontweight='bold', fontsize=12)
                 ax1a.grid(True, alpha=0.3)
                 ax1a.set_ylim(-5, results.get('pulse_amplitude', 20) + 10)
@@ -305,9 +305,9 @@ def hodgkin_huxley_interface():
             # Gating variables
             fig2, ax2 = plt.subplots(figsize=(10, 4))
             colors = get_theme_colors()
-            ax2.plot(results['t'], results['n'], label='n (K⁺ activation)', color=colors['secondary'], linewidth=2)
-            ax2.plot(results['t'], results['m'], label='m (Na⁺ activation)', color=colors['accent'], linewidth=2)
-            ax2.plot(results['t'], results['h'], label='h (Na⁺ inactivation)', color=colors['chart_3'], linewidth=2)
+            ax2.plot(results['t'], results['n'], label=r'$n$ (K$^+$ activation)', color=colors['secondary'], linewidth=2)
+            ax2.plot(results['t'], results['m'], label=r'$m$ (Na$^+$ activation)', color=colors['accent'], linewidth=2)
+            ax2.plot(results['t'], results['h'], label=r'$h$ (Na$^+$ inactivation)', color=colors['chart_3'], linewidth=2)
             ax2.set_xlabel('Time (ms)', fontfamily='Aclonica')
             ax2.set_ylabel('Gating Variable', fontfamily='Aclonica')
             ax2.set_title('Gating Variables vs Time', fontfamily='Aclonica', fontweight='bold')
@@ -319,9 +319,9 @@ def hodgkin_huxley_interface():
             # Phase space plot
             fig3, ax3 = plt.subplots(figsize=(10, 6))
             ax3.plot(results['V'], results['n'], color=colors['primary'], linewidth=2, alpha=0.8)
-            ax3.set_xlabel('Membrane Potential V (mV)', fontfamily='Aclonica')
-            ax3.set_ylabel('K⁺ Activation n', fontfamily='Aclonica')
-            ax3.set_title('Phase Space: V-n Plane', fontfamily='Aclonica', fontweight='bold')
+            ax3.set_xlabel(r'Membrane Potential $V$ (mV)', fontfamily='Aclonica')
+            ax3.set_ylabel(r'K$^+$ Activation $n$', fontfamily='Aclonica')
+            ax3.set_title(r'Phase Space: $V$-$n$ Plane', fontfamily='Aclonica', fontweight='bold')
             ax3.grid(True, alpha=0.3)
             st.pyplot(fig3)
             plt.close()
@@ -364,26 +364,26 @@ def phase_portrait_interface():
         
         st.subheader("Parameters")
         if system_type == "Van der Pol Oscillator":
-            mu = st.slider("μ (damping parameter)", 0.1, 5.0, 1.0, 0.1)
+            mu = st.slider("$\mu$ (damping parameter)", 0.1, 5.0, 1.0, 0.1)
             params = {'mu': mu}
         elif system_type == "Lotka-Volterra":
-            alpha = st.slider("α (prey growth)", 0.5, 2.0, 1.0, 0.1)
-            beta = st.slider("β (predation rate)", 0.5, 2.0, 1.0, 0.1)
-            gamma = st.slider("γ (predator death)", 0.5, 2.0, 1.0, 0.1)
-            delta = st.slider("δ (predator efficiency)", 0.5, 2.0, 1.0, 0.1)
+            alpha = st.slider("$\\alpha$ (prey growth)", 0.5, 2.0, 1.0, 0.1)
+            beta = st.slider("$\\beta$ (predation rate)", 0.5, 2.0, 1.0, 0.1)
+            gamma = st.slider("$\gamma$ (predator death)", 0.5, 2.0, 1.0, 0.1)
+            delta = st.slider("$\delta$ (predator efficiency)", 0.5, 2.0, 1.0, 0.1)
             params = {'alpha': alpha, 'beta': beta, 'gamma': gamma, 'delta': delta}
         elif system_type == "Duffing Oscillator":
-            a = st.slider("a (linear stiffness)", -2.0, 2.0, -1.0, 0.1)
-            b = st.slider("b (nonlinear stiffness)", 0.1, 2.0, 1.0, 0.1)
-            c = st.slider("c (damping)", 0.1, 1.0, 0.3, 0.05)
+            a = st.slider("$a$ (linear stiffness)", -2.0, 2.0, -1.0, 0.1)
+            b = st.slider("$b$ (nonlinear stiffness)", 0.1, 2.0, 1.0, 0.1)
+            c = st.slider("$c$ (damping)", 0.1, 1.0, 0.3, 0.05)
             params = {'a': a, 'b': b, 'c': c}
         elif system_type == "Pendulum":
-            b = st.slider("b (damping)", 0.0, 1.0, 0.25, 0.05)
-            g = st.slider("g/l (gravity/length)", 0.5, 2.0, 1.0, 0.1)
+            b = st.slider("$b$ (damping)", 0.0, 1.0, 0.25, 0.05)
+            g = st.slider("$g/l$ (gravity/length)", 0.5, 2.0, 1.0, 0.1)
             params = {'b': b, 'g': g}
         else:  # Custom system
-            st.text_area("dx/dt =", "x + y", key="dx_dt")
-            st.text_area("dy/dt =", "-x + y", key="dy_dt")
+            st.text_area("$dx/dt$ =", "x + y", key="dx_dt")
+            st.text_area("$dy/dt$ =", "-x + y", key="dy_dt")
             params = {}
         
         st.subheader("Plot Settings")
@@ -429,20 +429,20 @@ def bifurcation_interface():
         
         st.subheader("Parameter Ranges")
         if bifurc_type == "Logistic Map":
-            r_min = st.slider("r min", 0.0, 2.0, 0.5, 0.1)
-            r_max = st.slider("r max", 2.5, 4.0, 4.0, 0.1)
+            r_min = st.slider("$r$ min", 0.0, 2.0, 0.5, 0.1)
+            r_max = st.slider("$r$ max", 2.5, 4.0, 4.0, 0.1)
             param_range = (r_min, r_max)
         elif bifurc_type == "Pitchfork Bifurcation":
-            r_min = st.slider("r min", -2.0, 0.0, -1.0, 0.1)
-            r_max = st.slider("r max", 0.0, 2.0, 1.0, 0.1)
+            r_min = st.slider("$r$ min", -2.0, 0.0, -1.0, 0.1)
+            r_max = st.slider("$r$ max", 0.0, 2.0, 1.0, 0.1)
             param_range = (r_min, r_max)
         elif bifurc_type == "Hopf Bifurcation":
-            mu_min = st.slider("μ min", -1.0, 0.0, -0.5, 0.1)
-            mu_max = st.slider("μ max", 0.0, 1.0, 0.5, 0.1)
+            mu_min = st.slider("$\mu$ min", -1.0, 0.0, -0.5, 0.1)
+            mu_max = st.slider("$\mu$ max", 0.0, 1.0, 0.5, 0.1)
             param_range = (mu_min, mu_max)
         else:  # Saddle-Node
-            r_min = st.slider("r min", -1.0, 0.0, -0.5, 0.1)
-            r_max = st.slider("r max", 0.0, 1.0, 0.5, 0.1)
+            r_min = st.slider("$r$ min", -1.0, 0.0, -0.5, 0.1)
+            r_max = st.slider("$r$ max", 0.0, 1.0, 0.5, 0.1)
             param_range = (r_min, r_max)
         
         resolution = st.slider("Resolution", 100, 2000, 1000, 100)

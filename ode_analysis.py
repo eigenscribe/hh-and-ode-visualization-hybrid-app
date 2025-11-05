@@ -122,8 +122,8 @@ class ODEAnalyzer:
         # Styling
         ax.set_xlim(-x_range, x_range)
         ax.set_ylim(-y_range, y_range)
-        ax.set_xlabel('x', fontfamily='Aclonica', fontsize=14)
-        ax.set_ylabel('y', fontfamily='Aclonica', fontsize=14)
+        ax.set_xlabel(r'$x$', fontfamily='Aclonica', fontsize=14)
+        ax.set_ylabel(r'$y$', fontfamily='Aclonica', fontsize=14)
         ax.set_title(f'Phase Portrait: {system_type}', 
                     fontfamily='Aclonica', fontweight='bold', fontsize=16)
         ax.grid(True, alpha=0.3)
@@ -229,29 +229,29 @@ class ODEAnalyzer:
         
         if bifurc_type == "Logistic Map":
             param_vals, var_vals = self.logistic_map_bifurcation(param_range, resolution)
-            param_label = 'r'
-            var_label = 'x'
+            param_label = r'$r$'
+            var_label = r'$x$'
             title = 'Logistic Map Bifurcation Diagram'
             ax.scatter(param_vals, var_vals, s=0.1, c=self.colors['primary'], alpha=0.6)
             
         elif bifurc_type == "Pitchfork Bifurcation":
             param_vals, var_vals = self.pitchfork_bifurcation(param_range, resolution)
-            param_label = 'r'
-            var_label = 'x*'
+            param_label = r'$r$'
+            var_label = r'$x^*$'
             title = 'Pitchfork Bifurcation Diagram'
             ax.plot(param_vals, var_vals, '.', color=self.colors['secondary'], markersize=2)
             
         elif bifurc_type == "Hopf Bifurcation":
             param_vals, var_vals = self.hopf_bifurcation_system(param_range, resolution)
-            param_label = 'μ'
+            param_label = r'$\mu$'
             var_label = 'Amplitude'
             title = 'Hopf Bifurcation Diagram'
             ax.plot(param_vals, var_vals, '.', color=self.colors['accent'], markersize=2)
             
         elif bifurc_type == "Saddle-Node Bifurcation":
             param_vals, var_vals = self.saddle_node_bifurcation(param_range, resolution)
-            param_label = 'r'
-            var_label = 'x*'
+            param_label = r'$r$'
+            var_label = r'$x^*$'
             title = 'Saddle-Node Bifurcation Diagram'
             ax.plot(param_vals, var_vals, '.', color=self.colors['chart_3'], markersize=2)
         
