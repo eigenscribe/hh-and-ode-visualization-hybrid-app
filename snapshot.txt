@@ -1,0 +1,1898 @@
+# Repository Snapshot
+
+## Repo Intent (author-provided)
+
+[No repo intent provided]
+
+## Directory Tree
+
+.replit
+.streamlit
+  config.toml
+LICENSE
+app.py
+attached_assets
+  Pasted--CSS-HEX-french-violet-7400b8ff-grape-6930c3ff-slate-blue-5e60ceff-united-nati-1762381213354_1762381213355.txt
+  Pasted--style-import-url-https-fonts-googleapis-com-css2-family-Aclonica-display-swap-custom-varia-1759867622734_1759867622735.txt
+  Pasted--style-import-url-https-fonts-googleapis-com-css2-family-Aclonica-display-swap-custom-varia-1759867625260_1759867625260.txt
+  Pasted--style-import-url-https-fonts-googleapis-com-css2-family-Aclonica-display-swap-custom-varia-1759867778926_1759867778927.txt
+  globals_1759862306955.css
+hh_model.py
+ode_analysis.py
+plot_styling.py
+pyproject.toml
+repo-summary.py
+snapshot.txt
+uv.lock
+
+## Files
+
+
+
+=== .streamlit/config.toml ===
+
+[server]
+headless = true
+address = "0.0.0.0"
+port = 5000
+
+[theme]
+base = "dark"
+
+
+=== app.py ===
+
+import streamlit as st
+import numpy as np
+import matplotlib.pyplot as plt
+from hh_model import HodgkinHuxleySimulator
+from ode_analysis import ODEAnalyzer
+from plot_styling import setup_plot_theme, get_theme_colors
+
+# Page configuration
+st.set_page_config(
+    page_title="Hodgkin-Huxley & ODE Analysis",
+    page_icon="🧠",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+# Inject custom CSS
+def inject_custom_css():
+    with open("attached_assets/globals_1759862306955.css", "r") as f:
+        css = f.read()
+    
+    # Additional Streamlit-specific styling combined with imported CSS
+    streamlit_css = f"""
+    <style>
+    {css}
+    
+    .main {{
+        background: var(--color-bg);
+        color: var(--color-text);
+    }}
+    
+    .stTabs [data-baseweb="tab-list"] {{
+        background: var(--color-surface);
+        border-radius: var(--radius-lg);
+        padding: 0.5rem;
+        margin-bottom: 2rem;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        background: transparent;
+        border-radius: var(--radius-md);
+        color: var(--color-muted);
+        font-family: var(--font-aclonica);
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+        margin: 0 0.25rem;
+        transition: all 0.3s ease;
+    }}
+    
+    .stTabs [aria-selected="true"] {{
+        background: var(--gradient-light-to-dark-blue) !important;
+        color: white !important;
+        box-shadow: var(--shadow-md);
+    }}
+    
+    .glass-card {{
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 1.5rem;
+        margin: 1rem 0;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }}
+    
+    .glass-card:hover {{
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg);
+        border-color: var(--color-primary);
+    }}
+    
+    .stSelectbox > div > div {{
+        background: var(--input-background);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        color: var(--color-text);
+    }}
+    
+    .stSlider > div > div > div {{
+        background: var(--gradient-light-to-dark-blue);
+    }}
+    
+    .stButton > button {{
+        background: var(--gradient-light-to-dark-blue);
+        border: none;
+        border-radius: var(--radius-xl);
+        color: white;
+        font-family: var(--font-aclonica);
+        font-weight: 700;
+        padding: 0.75rem 2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px 0 rgba(56, 152, 255, 0.5);
+    }}
+    
+    .stButton > button:hover {{
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }}
+    
+    .gradient-text-primary {{
+        background: var(--gradient-light-to-dark-blue);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-family: var(--font-aclonica);
+        font-weight: 700;
+    }}
+    
+    .content-placeholder {{
+        background: var(--glass-bg);
+        border: 2px dashed var(--glass-border);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin: 1rem 0;
+        text-align: center;
+        color: var(--color-muted);
+        font-style: italic;
+    }}
+    
+    h1, h2, h3, h4, h5, h6 {{
+        font-family: var(--font-aclonica) !important;
+        color: var(--color-text);
+    }}
+    
+    .math-equation {{
+        font-family: "Times New Roman", "Computer Modern", serif !important;
+        color: var(--color-math);
+    }}
+    </style>
+    """
+    
+    st.markdown(streamlit_css, unsafe_allow_html=True)
+
+# Initialize CSS
+inject_custom_css()
+
+def main():
+    # App header
+    st.markdown('<h1 class="gradient-text-primary">Hodgkin-Huxley & ODE Analysis Platform</h1>', unsafe_allow_html=True)
+    
+    # Create tabs
+    tab1, tab2 = st.tabs(["🧠 Hodgkin-Huxley Model", "📊 ODE Phase Analysis"])
+    
+    with tab1:
+        hodgkin_huxley_interface()
+    
+    with tab2:
+        ode_analysis_interface()
+
+def hodgkin_huxley_interface():
+    st.markdown('<h2 class="gradient-text-secondary">Hodgkin-Huxley Neuron Model</h2>', unsafe_allow_html=True)
+    
+    # Content placeholder
+    st.markdown("""
+    <div class="content-placeholder">
+        <h3>Educational Content Area</h3>
+        <p>This section will contain information about the Hodgkin-Huxley model, its biological significance, and mathematical formulation.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        st.subheader("Model Parameters")
+        
+        # Fixed parameters from Hodgkin & Huxley (1952)
+        g_Na = 120      # mS/cm² - Sodium conductance
+        g_K = 36        # mS/cm² - Potassium conductance
+        g_L = 0.3       # mS/cm² - Leak conductance
+        E_Na = 50       # mV - Sodium reversal potential
+        E_K = -77       # mV - Potassium reversal potential
+        E_L = -54.387   # mV - Leak reversal potential
+        
+        # HH Model Parameters
+        st.markdown("**Membrane Properties**")
+        C_m = st.slider("Membrane Capacitance (μF/cm²)", 0.5, 2.0, 1.0, 0.1)
+        
+        st.markdown("**Conductances (Fixed)**")
+        st.markdown(f"$g_{{Na}}$ = {g_Na} mS/cm²")
+        st.markdown(f"$g_{{K}}$ = {g_K} mS/cm²")
+        st.markdown(f"$g_{{L}}$ = {g_L} mS/cm²")
+        
+        st.markdown("**Reversal Potentials (Fixed)**")
+        st.markdown(f"$E_{{Na}}$ = {E_Na} mV")
+        st.markdown(f"$E_{{K}}$ = {E_K} mV")
+        st.markdown(f"$E_{{L}}$ = {E_L} mV")
+        
+        st.markdown("**Stimulation**")
+        stim_mode = st.radio("Stimulus Type", ["Constant Current", "Pulse Train"], horizontal=True)
+        
+        if stim_mode == "Constant Current":
+            I_ext = st.slider("Applied Current (μA/cm²)", -50, 100, 10, 1)
+            duration = st.slider("Simulation Duration (ms)", 10, 200, 50, 5)
+            pulse_params = None
+        else:
+            duration = st.slider("Total Duration (ms)", 50, 500, 200, 10)
+            n_pulses = st.slider("Number of Pulses", 1, 10, 3, 1)
+            pulse_start = st.slider("First Pulse Start (ms)", 0.0, 50.0, 10.0, 1.0)
+            pulse_duration = st.slider("Pulse Duration (ms)", 1.0, 50.0, 5.0, 1.0)
+            pulse_interval = st.slider("Inter-Pulse Interval (ms)", 5.0, 100.0, 30.0, 5.0)
+            pulse_amplitude = st.slider("Pulse Amplitude (μA/cm²)", -50, 100, 20, 1)
+            I_ext = 0  # baseline current
+            pulse_params = {
+                'n_pulses': n_pulses,
+                'start': pulse_start,
+                'duration': pulse_duration,
+                'interval': pulse_interval,
+                'amplitude': pulse_amplitude
+            }
+        
+        st.markdown("**Threshold Detection**")
+        V_threshold = st.slider("Firing Threshold (mV)", -70.0, -40.0, -55.0, 0.5)
+        show_threshold = st.checkbox("Show threshold line", value=True)
+        
+        simulate_button = st.button("🚀 Run Simulation", key="hh_simulate")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        
+        if simulate_button or 'hh_results' not in st.session_state:
+            # Initialize HH simulator
+            hh_sim = HodgkinHuxleySimulator(C_m, g_Na, g_K, g_L, E_Na, E_K, E_L)
+            
+            # Run simulation
+            with st.spinner("Running Hodgkin-Huxley simulation..."):
+                if pulse_params:
+                    results = hh_sim.simulate_pulse_train(pulse_params, duration)
+                    st.session_state.pulse_params = pulse_params
+                else:
+                    results = hh_sim.simulate(I_ext, duration)
+                    st.session_state.pulse_params = None
+                
+                st.session_state.hh_results = results
+                st.session_state.V_threshold = V_threshold
+                st.session_state.show_threshold = show_threshold
+        
+        if 'hh_results' in st.session_state:
+            results = st.session_state.hh_results
+            
+            # Setup plot theme
+            setup_plot_theme()
+            
+            # Voltage trace with stimulus visualization
+            if st.session_state.get('pulse_params'):
+                # Create subplots for pulse train visualization
+                fig1, (ax1a, ax1) = plt.subplots(2, 1, figsize=(10, 6), 
+                                                gridspec_kw={'height_ratios': [1, 3]}, sharex=True)
+                
+                # Plot stimulus pulses
+                pulse_params = st.session_state.get('pulse_params')
+                for pulse_start, pulse_end in results.get('pulse_times', []):
+                    ax1a.axvspan(pulse_start, pulse_end, 
+                                color=get_theme_colors()['chart_5'], alpha=0.6)
+                    ax1a.hlines(results.get('pulse_amplitude', 0), pulse_start, pulse_end,
+                              color=get_theme_colors()['chart_5'], linewidth=3)
+                
+                ax1a.set_ylabel(r'$I$ (μA/cm²)', fontfamily='Aclonica', fontsize=10)
+                ax1a.set_title('Stimulus Current', fontfamily='Aclonica', fontweight='bold', fontsize=12)
+                ax1a.grid(True, alpha=0.3)
+                ax1a.set_ylim(-5, results.get('pulse_amplitude', 20) + 10)
+            else:
+                fig1, ax1 = plt.subplots(figsize=(10, 4))
+            
+            # Plot voltage
+            ax1.plot(results['t'], results['V'], color=get_theme_colors()['primary'], linewidth=2, label='Membrane Potential')
+            
+            # Add threshold line if enabled
+            if st.session_state.get('show_threshold', True):
+                threshold = st.session_state.get('V_threshold', -55.0)
+                ax1.axhline(y=threshold, color=get_theme_colors()['secondary'], 
+                           linestyle='--', linewidth=2, alpha=0.8, label=f'Threshold ({threshold} mV)')
+                
+                # Detect spikes (threshold crossings)
+                V = results['V']
+                spike_times = []
+                for i in range(1, len(V)):
+                    if V[i-1] < threshold and V[i] >= threshold:
+                        spike_times.append(results['t'][i])
+                
+                # Mark spike times
+                for spike_t in spike_times:
+                    ax1.axvline(x=spike_t, color=get_theme_colors()['accent'], 
+                               linestyle=':', linewidth=1, alpha=0.5)
+                
+                # Display spike count
+                if spike_times:
+                    ax1.text(0.02, 0.98, f'Spikes: {len(spike_times)}', 
+                            transform=ax1.transAxes, fontfamily='Aclonica',
+                            verticalalignment='top', fontsize=11,
+                            bbox=dict(boxstyle='round', facecolor=get_theme_colors()['surface'], 
+                                    alpha=0.8, edgecolor=get_theme_colors()['primary']))
+            
+            ax1.set_xlabel('Time (ms)', fontfamily='Aclonica')
+            ax1.set_ylabel('Membrane Potential (mV)', fontfamily='Aclonica')
+            ax1.set_title('Membrane Potential vs Time', fontfamily='Aclonica', fontweight='bold')
+            ax1.legend(prop={'family': 'Aclonica', 'size': 9}, loc='upper right')
+            ax1.grid(True, alpha=0.3)
+            
+            plt.tight_layout()
+            st.pyplot(fig1)
+            plt.close()
+            
+            # Gating variables
+            fig2, ax2 = plt.subplots(figsize=(10, 4))
+            colors = get_theme_colors()
+            ax2.plot(results['t'], results['n'], label=r'$n$ (K$^+$ activation)', color=colors['secondary'], linewidth=2)
+            ax2.plot(results['t'], results['m'], label=r'$m$ (Na$^+$ activation)', color=colors['accent'], linewidth=2)
+            ax2.plot(results['t'], results['h'], label=r'$h$ (Na$^+$ inactivation)', color=colors['chart_3'], linewidth=2)
+            ax2.set_xlabel('Time (ms)', fontfamily='Aclonica')
+            ax2.set_ylabel('Gating Variable', fontfamily='Aclonica')
+            ax2.set_title('Gating Variables vs Time', fontfamily='Aclonica', fontweight='bold')
+            ax2.legend(prop={'family': 'Aclonica', 'size': 10})
+            ax2.grid(True, alpha=0.3)
+            st.pyplot(fig2)
+            plt.close()
+            
+            # Phase space plot
+            fig3, ax3 = plt.subplots(figsize=(10, 6))
+            ax3.plot(results['V'], results['n'], color=colors['primary'], linewidth=2, alpha=0.8)
+            ax3.set_xlabel(r'Membrane Potential $V$ (mV)', fontfamily='Aclonica')
+            ax3.set_ylabel(r'K$^+$ Activation $n$', fontfamily='Aclonica')
+            ax3.set_title(r'Phase Space: $V$-$n$ Plane', fontfamily='Aclonica', fontweight='bold')
+            ax3.grid(True, alpha=0.3)
+            st.pyplot(fig3)
+            plt.close()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+def ode_analysis_interface():
+    st.markdown('<h2 class="gradient-text-accent">ODE Phase Portraits & Bifurcation Analysis</h2>', unsafe_allow_html=True)
+    
+    # Content placeholder
+    st.markdown("""
+    <div class="content-placeholder">
+        <h3>Educational Content Area</h3>
+        <p>This section will contain theory about phase portraits, bifurcation diagrams, and dynamical systems analysis.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    analysis_type = st.selectbox("Select Analysis Type", 
+                                ["Phase Portrait", "Bifurcation Diagram"])
+    
+    if analysis_type == "Phase Portrait":
+        phase_portrait_interface()
+    else:
+        bifurcation_interface()
+
+def phase_portrait_interface():
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        st.subheader("System Selection")
+        
+        system_type = st.selectbox("ODE System", [
+            "Van der Pol Oscillator", 
+            "Lotka-Volterra", 
+            "Duffing Oscillator",
+            "Pendulum",
+            "Custom 2D System"
+        ])
+        
+        st.subheader("Parameters")
+        if system_type == "Van der Pol Oscillator":
+            mu = st.slider("$\mu$ (damping parameter)", 0.1, 5.0, 1.0, 0.1)
+            params = {'mu': mu}
+        elif system_type == "Lotka-Volterra":
+            alpha = st.slider("$\\alpha$ (prey growth)", 0.5, 2.0, 1.0, 0.1)
+            beta = st.slider("$\\beta$ (predation rate)", 0.5, 2.0, 1.0, 0.1)
+            gamma = st.slider("$\gamma$ (predator death)", 0.5, 2.0, 1.0, 0.1)
+            delta = st.slider("$\delta$ (predator efficiency)", 0.5, 2.0, 1.0, 0.1)
+            params = {'alpha': alpha, 'beta': beta, 'gamma': gamma, 'delta': delta}
+        elif system_type == "Duffing Oscillator":
+            a = st.slider("$a$ (linear stiffness)", -2.0, 2.0, -1.0, 0.1)
+            b = st.slider("$b$ (nonlinear stiffness)", 0.1, 2.0, 1.0, 0.1)
+            c = st.slider("$c$ (damping)", 0.1, 1.0, 0.3, 0.05)
+            params = {'a': a, 'b': b, 'c': c}
+        elif system_type == "Pendulum":
+            b = st.slider("$b$ (damping)", 0.0, 1.0, 0.25, 0.05)
+            g = st.slider("$g/l$ (gravity/length)", 0.5, 2.0, 1.0, 0.1)
+            params = {'b': b, 'g': g}
+        else:  # Custom system
+            st.text_area("$dx/dt$ =", "x + y", key="dx_dt")
+            st.text_area("$dy/dt$ =", "-x + y", key="dy_dt")
+            params = {}
+        
+        st.subheader("Plot Settings")
+        x_range = st.slider("X range", 1, 10, 5)
+        y_range = st.slider("Y range", 1, 10, 5)
+        n_trajectories = st.slider("Number of trajectories", 1, 20, 5)
+        
+        plot_button = st.button("📈 Generate Phase Portrait", key="phase_plot")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        
+        if plot_button or f'phase_results_{system_type}' not in st.session_state:
+            ode_analyzer = ODEAnalyzer()
+            
+            with st.spinner("Generating phase portrait..."):
+                fig = ode_analyzer.plot_phase_portrait(
+                    system_type, params, x_range, y_range, n_trajectories
+                )
+                st.session_state[f'phase_results_{system_type}'] = fig
+        
+        if f'phase_results_{system_type}' in st.session_state:
+            fig = st.session_state[f'phase_results_{system_type}']
+            st.pyplot(fig)
+            plt.close()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+def bifurcation_interface():
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        st.subheader("Bifurcation Analysis")
+        
+        bifurc_type = st.selectbox("Bifurcation Type", [
+            "Logistic Map",
+            "Pitchfork Bifurcation", 
+            "Hopf Bifurcation",
+            "Saddle-Node Bifurcation"
+        ])
+        
+        st.subheader("Parameter Ranges")
+        if bifurc_type == "Logistic Map":
+            r_min = st.slider("$r$ min", 0.0, 2.0, 0.5, 0.1)
+            r_max = st.slider("$r$ max", 2.5, 4.0, 4.0, 0.1)
+            param_range = (r_min, r_max)
+        elif bifurc_type == "Pitchfork Bifurcation":
+            r_min = st.slider("$r$ min", -2.0, 0.0, -1.0, 0.1)
+            r_max = st.slider("$r$ max", 0.0, 2.0, 1.0, 0.1)
+            param_range = (r_min, r_max)
+        elif bifurc_type == "Hopf Bifurcation":
+            mu_min = st.slider("$\mu$ min", -1.0, 0.0, -0.5, 0.1)
+            mu_max = st.slider("$\mu$ max", 0.0, 1.0, 0.5, 0.1)
+            param_range = (mu_min, mu_max)
+        else:  # Saddle-Node
+            r_min = st.slider("$r$ min", -1.0, 0.0, -0.5, 0.1)
+            r_max = st.slider("$r$ max", 0.0, 1.0, 0.5, 0.1)
+            param_range = (r_min, r_max)
+        
+        resolution = st.slider("Resolution", 100, 2000, 1000, 100)
+        
+        bifurc_button = st.button("🔄 Generate Bifurcation Diagram", key="bifurc_plot")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="glass-card">', unsafe_allow_html=True)
+        
+        if bifurc_button or f'bifurc_results_{bifurc_type}' not in st.session_state:
+            ode_analyzer = ODEAnalyzer()
+            
+            with st.spinner("Computing bifurcation diagram..."):
+                fig = ode_analyzer.plot_bifurcation_diagram(
+                    bifurc_type, param_range, resolution
+                )
+                st.session_state[f'bifurc_results_{bifurc_type}'] = fig
+        
+        if f'bifurc_results_{bifurc_type}' in st.session_state:
+            fig = st.session_state[f'bifurc_results_{bifurc_type}']
+            st.pyplot(fig)
+            plt.close()
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
+
+
+=== attached_assets/Pasted--CSS-HEX-french-violet-7400b8ff-grape-6930c3ff-slate-blue-5e60ceff-united-nati-1762381213354_1762381213355.txt ===
+
+/* CSS HEX */
+--french-violet: #7400b8ff;
+--grape: #6930c3ff;
+--slate-blue: #5e60ceff;
+--united-nations-blue: #5390d9ff;
+--picton-blue: #4ea8deff;
+--aero: #48bfe3ff;
+--sky-blue: #56cfe1ff;
+--tiffany-blue: #64dfdfff;
+--turquoise: #72efddff;
+--aquamarine: #80ffdbff;
+
+/* CSS HSL */
+--french-violet: hsla(278, 100%, 36%, 1);
+--grape: hsla(263, 60%, 48%, 1);
+--slate-blue: hsla(239, 53%, 59%, 1);
+--united-nations-blue: hsla(213, 64%, 59%, 1);
+--picton-blue: hsla(203, 69%, 59%, 1);
+--aero: hsla(194, 73%, 59%, 1);
+--sky-blue: hsla(188, 70%, 61%, 1);
+--tiffany-blue: hsla(180, 66%, 63%, 1);
+--turquoise: hsla(171, 80%, 69%, 1);
+--aquamarine: hsla(163, 100%, 75%, 1);
+
+/* SCSS HEX */
+$french-violet: #7400b8ff;
+$grape: #6930c3ff;
+$slate-blue: #5e60ceff;
+$united-nations-blue: #5390d9ff;
+$picton-blue: #4ea8deff;
+$aero: #48bfe3ff;
+$sky-blue: #56cfe1ff;
+$tiffany-blue: #64dfdfff;
+$turquoise: #72efddff;
+$aquamarine: #80ffdbff;
+
+/* SCSS HSL */
+$french-violet: hsla(278, 100%, 36%, 1);
+$grape: hsla(263, 60%, 48%, 1);
+$slate-blue: hsla(239, 53%, 59%, 1);
+$united-nations-blue: hsla(213, 64%, 59%, 1);
+$picton-blue: hsla(203, 69%, 59%, 1);
+$aero: hsla(194, 73%, 59%, 1);
+$sky-blue: hsla(188, 70%, 61%, 1);
+$tiffany-blue: hsla(180, 66%, 63%, 1);
+$turquoise: hsla(171, 80%, 69%, 1);
+$aquamarine: hsla(163, 100%, 75%, 1);
+
+/* SCSS RGB */
+$french-violet: rgba(116, 0, 184, 1);
+$grape: rgba(105, 48, 195, 1);
+$slate-blue: rgba(94, 96, 206, 1);
+$united-nations-blue: rgba(83, 144, 217, 1);
+$picton-blue: rgba(78, 168, 222, 1);
+$aero: rgba(72, 191, 227, 1);
+$sky-blue: rgba(86, 207, 225, 1);
+$tiffany-blue: rgba(100, 223, 223, 1);
+$turquoise: rgba(114, 239, 221, 1);
+$aquamarine: rgba(128, 255, 219, 1);
+
+/* SCSS Gradient */
+$gradient-top: linear-gradient(0deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-right: linear-gradient(90deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-bottom: linear-gradient(180deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-left: linear-gradient(270deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-top-right: linear-gradient(45deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-bottom-right: linear-gradient(135deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-top-left: linear-gradient(225deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-bottom-left: linear-gradient(315deg, #7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+$gradient-radial: radial-gradient(#7400b8ff, #6930c3ff, #5e60ceff, #5390d9ff, #4ea8deff, #48bfe3ff, #56cfe1ff, #64dfdfff, #72efddff, #80ffdbff);
+
+=== attached_assets/Pasted--style-import-url-https-fonts-googleapis-com-css2-family-Aclonica-display-swap-custom-varia-1759867622734_1759867622735.txt ===
+
+<style>@import url("https://fonts.googleapis.com/css2?family=Aclonica&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+:root { --font-size: 14px;
+
+/* Portfolio-lite Color Palette */ --color-bg: #0d1117; --color-surface: #161b22; --color-primary: #14b5ff; --color-secondary: #f78166; --color-text: whitesmoke; --color-muted: #8b949e;
+
+/* Link Colors */ --color-link: #7652f5; --color-link-hover: #00e8ff;
+
+/* Math equation colors */ --color-math: #00f5db;
+
+/* Gradients */ --gradient-light-to-dark-blue: linear-gradient(to right bottom, #00e8ff, #14b5ff, #3a98ff, #0070eb); --gradient-cyan-to-blue: linear-gradient(130deg, #00ffee, #0a95eb); --gradient-green-to-blue: linear-gradient(#22f792, #27aaff);
+--gradient-blue-to-purple: linear-gradient(to right bottom, #00e8ff, #14b5ff, #5280ff, #7952f5); --gradient-blue-to-purple-transparent: linear-gradient(to right bottom, rgba(0, 232, 255, 0.2), rgba(20, 181,255, 0.2), rgba(82, 128, 255, 0.2), rgba(121, 82, 245, 0.2));
+
+/* Icon Gradients */ --tech-icon-gradient: linear-gradient(145deg, rgba(34, 247, 147, 0.8), rgba(10, 149, 235, 0.8)); --stem-icon-gradient: linear-gradient(145deg, rgba(169, 34, 247, 0.8), rgba(10, 149, 235, 0.8));
+
+/* Typography */ --font-aclonica: 'Aclonica', sans-serif; --font-mono: 'Fira Code', monospace; --font-math: "Times New Roman", "Computer Modern", serif;
+
+/* Borders & Radius */ --radius-sx: 4px; --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 50px;
+
+/* Shadows */ --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2); --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3); --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4); --shadow-header: 0 2px 10px rgba(0, 0, 0, 0.3); --shadow-logo: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+/* Glassmorphism */ --glass-bg: rgba(0, 0, 0, 0.5); --glass-border: rgba(255, 255, 255, 0.1);
+
+/* Original design system variables */ --background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #d4183d; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: transparent; --input-background: var(--color-surface); --switch-background: #cbced4; --font-weight-medium: 500; --font-weight-normal: 400; --ring: var(--color-primary); --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --radius: var(--radius-lg); --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+.dark { /* Light mode overrides */ --color-bg: #f8f9fa; --color-surface: #ffffff; --color-text: #1a1d23; --color-muted: #6c757d; --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(0, 0, 0, 0.1);
+
+--background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #dc3545; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: var(--color-surface); --ring: var(--color-primary); --font-weight-medium: 500; --font-weight-normal: 400; --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground); --color-border: var(--border); --color-input: var(--input); --color-input-background: var(--input-background); --color-switch-background: var(--switch-background); --color-ring: var(--ring); --color-chart-1: var(--chart-1); --color-chart-2: var(--chart-2); --color-chart-3: var(--chart-3); --color-chart-4: var(--chart-4); --color-chart-5: var(--chart-5); --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px); --color-sidebar: var(--sidebar); --color-sidebar-foreground: var(--sidebar-foreground); --color-sidebar-primary: var(--sidebar-primary); --color-sidebar-primary-foreground: var(--sidebar-primary-foreground); --color-sidebar-accent: var(--sidebar-accent); --color-sidebar-accent-foreground: var(--sidebar-accent-foreground); --color-sidebar-border: var(--sidebar-border); --color-sidebar-ring: var(--sidebar-ring); }
+
+@layer base {
+
+{ @apply border-border outline-ring/50; box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-aclonica); }
+html, body { margin: 0; padding: 0; transition: all 0.4s ease-in-out; font-family: var(--font-aclonica); }
+
+body { @apply bg-background text-foreground; } }
+
+/* Portfolio-lite Glass Card System */ .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+
+.glass-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg); border-color: var(--color-primary); }
+
+/* Portfolio-lite Button System */ .portfolio-btn { background-image: var(--gradient-light-to-dark-blue); box-shadow: 0 4px 15px 0 rgba(56, 152, 255, 0.5); font-weight: 700; text-align: center; border: none; background-size: 300% 100%; border-radius: var(--radius-xl); transition: all 0.4s ease-in-out; position: relative; z-index: 1; color: white; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); cursor: pointer; letter-spacing: 0.5px; }
+
+.portfolio-btn:hover { background-position: 100% 0; filter: brightness(1.1); }
+
+.portfolio-btn-secondary { background-image: var(--gradient-blue-to-purple) !important; box-shadow: 0 4px 15px 0 rgba(20, 165, 255, 0.6); color: white !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* Improved contrast for text on bright backgrounds / .glass-card [style="background: var(--gradient-green-to-blue)"] { color: #1a1d23 !important; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); }
+
+.glass-card [style*="background: var(--gradient-green-to-blue)"] .lucide { color: #1a1d23 !important; }
+
+/* Gradient Text Effects - Dark Mode */ .gradient-text-primary { background: var(--gradient-light-to-dark-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-secondary { background: var(--gradient-cyan-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-accent { background: var(--gradient-green-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Gradient Text Effects - Light Mode (softer, more muted for reduced eye strain) */ .dark .gradient-text-primary { background: linear-gradient(145deg, #6b46c1, #4a90e2, #5b7ec8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-secondary { background: linear-gradient(145deg, #8b5cf6, #6366f1, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-accent { background: linear-gradient(145deg, #4f7ab8, #3b82f6, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+/**
+
+Base typography. This is not applied to elements which have an ancestor with a Tailwind text class. / @layer base { :where(:not(:has([class=" text-"]), :not(:has([class^="text-"])))) { h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h2 { font-size: var(--text-xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h3 { font-size: var(--text-lg); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+p { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); }
+
+label { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+input { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); } } }
+
+html { font-size: var(--font-size); }
+
+Hodgkin-Huxley & ODE Analysis Platform
+
+🧠 Hodgkin-Huxley Model
+
+
+📊 ODE Phase Analysis
+
+Hodgkin-Huxley Neuron Model
+Educational Content Area
+This section will contain information about the Hodgkin-Huxley model, its biological significance, and mathematical formulation.
+
+Model Parameters
+Membrane Properties
+
+Membrane Capacitance (μF/cm²)
+
+0.50
+2.00
+Maximum Conductances
+
+Sodium Conductance (mS/cm²)
+
+50
+200
+Potassium Conductance (mS/cm²)
+
+10
+50
+Leak Conductance (mS/cm²)
+
+0.10
+1.00
+Reversal Potentials
+
+Sodium Reversal Potential (mV)
+
+40
+70
+Potassium Reversal Potential (mV)
+
+-100
+-60
+streamlit.errors.StreamlitAPIException: Slider value arguments must be of matching types. min_value has int type. max_value has int type. step has float type.
+
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/app.py", line 382, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 143, in main
+    hodgkin_huxley_interface()
+File "/home/runner/workspace/app.py", line 177, in hodgkin_huxley_interface
+    E_L = st.slider("Leak Reversal Potential (mV)", -70, -50, -54.387, 0.1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/elements/widgets/slider.py", line 633, in slider
+    return self._slider(
+           ^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/elements/widgets/slider.py", line 835, in _slider
+    raise StreamlitAPIException(msg)
+
+=== attached_assets/Pasted--style-import-url-https-fonts-googleapis-com-css2-family-Aclonica-display-swap-custom-varia-1759867625260_1759867625260.txt ===
+
+<style>@import url("https://fonts.googleapis.com/css2?family=Aclonica&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+:root { --font-size: 14px;
+
+/* Portfolio-lite Color Palette */ --color-bg: #0d1117; --color-surface: #161b22; --color-primary: #14b5ff; --color-secondary: #f78166; --color-text: whitesmoke; --color-muted: #8b949e;
+
+/* Link Colors */ --color-link: #7652f5; --color-link-hover: #00e8ff;
+
+/* Math equation colors */ --color-math: #00f5db;
+
+/* Gradients */ --gradient-light-to-dark-blue: linear-gradient(to right bottom, #00e8ff, #14b5ff, #3a98ff, #0070eb); --gradient-cyan-to-blue: linear-gradient(130deg, #00ffee, #0a95eb); --gradient-green-to-blue: linear-gradient(#22f792, #27aaff);
+--gradient-blue-to-purple: linear-gradient(to right bottom, #00e8ff, #14b5ff, #5280ff, #7952f5); --gradient-blue-to-purple-transparent: linear-gradient(to right bottom, rgba(0, 232, 255, 0.2), rgba(20, 181,255, 0.2), rgba(82, 128, 255, 0.2), rgba(121, 82, 245, 0.2));
+
+/* Icon Gradients */ --tech-icon-gradient: linear-gradient(145deg, rgba(34, 247, 147, 0.8), rgba(10, 149, 235, 0.8)); --stem-icon-gradient: linear-gradient(145deg, rgba(169, 34, 247, 0.8), rgba(10, 149, 235, 0.8));
+
+/* Typography */ --font-aclonica: 'Aclonica', sans-serif; --font-mono: 'Fira Code', monospace; --font-math: "Times New Roman", "Computer Modern", serif;
+
+/* Borders & Radius */ --radius-sx: 4px; --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 50px;
+
+/* Shadows */ --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2); --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3); --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4); --shadow-header: 0 2px 10px rgba(0, 0, 0, 0.3); --shadow-logo: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+/* Glassmorphism */ --glass-bg: rgba(0, 0, 0, 0.5); --glass-border: rgba(255, 255, 255, 0.1);
+
+/* Original design system variables */ --background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #d4183d; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: transparent; --input-background: var(--color-surface); --switch-background: #cbced4; --font-weight-medium: 500; --font-weight-normal: 400; --ring: var(--color-primary); --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --radius: var(--radius-lg); --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+.dark { /* Light mode overrides */ --color-bg: #f8f9fa; --color-surface: #ffffff; --color-text: #1a1d23; --color-muted: #6c757d; --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(0, 0, 0, 0.1);
+
+--background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #dc3545; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: var(--color-surface); --ring: var(--color-primary); --font-weight-medium: 500; --font-weight-normal: 400; --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground); --color-border: var(--border); --color-input: var(--input); --color-input-background: var(--input-background); --color-switch-background: var(--switch-background); --color-ring: var(--ring); --color-chart-1: var(--chart-1); --color-chart-2: var(--chart-2); --color-chart-3: var(--chart-3); --color-chart-4: var(--chart-4); --color-chart-5: var(--chart-5); --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px); --color-sidebar: var(--sidebar); --color-sidebar-foreground: var(--sidebar-foreground); --color-sidebar-primary: var(--sidebar-primary); --color-sidebar-primary-foreground: var(--sidebar-primary-foreground); --color-sidebar-accent: var(--sidebar-accent); --color-sidebar-accent-foreground: var(--sidebar-accent-foreground); --color-sidebar-border: var(--sidebar-border); --color-sidebar-ring: var(--sidebar-ring); }
+
+@layer base {
+
+{ @apply border-border outline-ring/50; box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-aclonica); }
+html, body { margin: 0; padding: 0; transition: all 0.4s ease-in-out; font-family: var(--font-aclonica); }
+
+body { @apply bg-background text-foreground; } }
+
+/* Portfolio-lite Glass Card System */ .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+
+.glass-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg); border-color: var(--color-primary); }
+
+/* Portfolio-lite Button System */ .portfolio-btn { background-image: var(--gradient-light-to-dark-blue); box-shadow: 0 4px 15px 0 rgba(56, 152, 255, 0.5); font-weight: 700; text-align: center; border: none; background-size: 300% 100%; border-radius: var(--radius-xl); transition: all 0.4s ease-in-out; position: relative; z-index: 1; color: white; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); cursor: pointer; letter-spacing: 0.5px; }
+
+.portfolio-btn:hover { background-position: 100% 0; filter: brightness(1.1); }
+
+.portfolio-btn-secondary { background-image: var(--gradient-blue-to-purple) !important; box-shadow: 0 4px 15px 0 rgba(20, 165, 255, 0.6); color: white !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* Improved contrast for text on bright backgrounds / .glass-card [style="background: var(--gradient-green-to-blue)"] { color: #1a1d23 !important; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); }
+
+.glass-card [style*="background: var(--gradient-green-to-blue)"] .lucide { color: #1a1d23 !important; }
+
+/* Gradient Text Effects - Dark Mode */ .gradient-text-primary { background: var(--gradient-light-to-dark-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-secondary { background: var(--gradient-cyan-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-accent { background: var(--gradient-green-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Gradient Text Effects - Light Mode (softer, more muted for reduced eye strain) */ .dark .gradient-text-primary { background: linear-gradient(145deg, #6b46c1, #4a90e2, #5b7ec8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-secondary { background: linear-gradient(145deg, #8b5cf6, #6366f1, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-accent { background: linear-gradient(145deg, #4f7ab8, #3b82f6, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+/**
+
+Base typography. This is not applied to elements which have an ancestor with a Tailwind text class. / @layer base { :where(:not(:has([class=" text-"]), :not(:has([class^="text-"])))) { h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h2 { font-size: var(--text-xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h3 { font-size: var(--text-lg); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+p { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); }
+
+label { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+input { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); } } }
+
+html { font-size: var(--font-size); }
+
+Hodgkin-Huxley & ODE Analysis Platform
+
+🧠 Hodgkin-Huxley Model
+
+
+📊 ODE Phase Analysis
+
+Hodgkin-Huxley Neuron Model
+Educational Content Area
+This section will contain information about the Hodgkin-Huxley model, its biological significance, and mathematical formulation.
+
+Model Parameters
+Membrane Properties
+
+Membrane Capacitance (μF/cm²)
+
+0.50
+2.00
+Maximum Conductances
+
+Sodium Conductance (mS/cm²)
+
+50
+200
+Potassium Conductance (mS/cm²)
+
+10
+50
+Leak Conductance (mS/cm²)
+
+0.10
+1.00
+Reversal Potentials
+
+Sodium Reversal Potential (mV)
+
+40
+70
+Potassium Reversal Potential (mV)
+
+-100
+-60
+streamlit.errors.StreamlitAPIException: Slider value arguments must be of matching types. min_value has int type. max_value has int type. step has float type.
+
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/app.py", line 382, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 143, in main
+    hodgkin_huxley_interface()
+File "/home/runner/workspace/app.py", line 177, in hodgkin_huxley_interface
+    E_L = st.slider("Leak Reversal Potential (mV)", -70, -50, -54.387, 0.1)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/elements/widgets/slider.py", line 633, in slider
+    return self._slider(
+           ^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/elements/widgets/slider.py", line 835, in _slider
+    raise StreamlitAPIException(msg)
+
+=== attached_assets/Pasted--style-import-url-https-fonts-googleapis-com-css2-family-Aclonica-display-swap-custom-varia-1759867778926_1759867778927.txt ===
+
+<style>@import url("https://fonts.googleapis.com/css2?family=Aclonica&display=swap");
+
+@custom-variant dark (&:is(.dark *));
+
+:root { --font-size: 14px;
+
+/* Portfolio-lite Color Palette */ --color-bg: #0d1117; --color-surface: #161b22; --color-primary: #14b5ff; --color-secondary: #f78166; --color-text: whitesmoke; --color-muted: #8b949e;
+
+/* Link Colors */ --color-link: #7652f5; --color-link-hover: #00e8ff;
+
+/* Math equation colors */ --color-math: #00f5db;
+
+/* Gradients */ --gradient-light-to-dark-blue: linear-gradient(to right bottom, #00e8ff, #14b5ff, #3a98ff, #0070eb); --gradient-cyan-to-blue: linear-gradient(130deg, #00ffee, #0a95eb); --gradient-green-to-blue: linear-gradient(#22f792, #27aaff);
+--gradient-blue-to-purple: linear-gradient(to right bottom, #00e8ff, #14b5ff, #5280ff, #7952f5); --gradient-blue-to-purple-transparent: linear-gradient(to right bottom, rgba(0, 232, 255, 0.2), rgba(20, 181,255, 0.2), rgba(82, 128, 255, 0.2), rgba(121, 82, 245, 0.2));
+
+/* Icon Gradients */ --tech-icon-gradient: linear-gradient(145deg, rgba(34, 247, 147, 0.8), rgba(10, 149, 235, 0.8)); --stem-icon-gradient: linear-gradient(145deg, rgba(169, 34, 247, 0.8), rgba(10, 149, 235, 0.8));
+
+/* Typography */ --font-aclonica: 'Aclonica', sans-serif; --font-mono: 'Fira Code', monospace; --font-math: "Times New Roman", "Computer Modern", serif;
+
+/* Borders & Radius */ --radius-sx: 4px; --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px; --radius-xl: 50px;
+
+/* Shadows */ --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2); --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3); --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.4); --shadow-header: 0 2px 10px rgba(0, 0, 0, 0.3); --shadow-logo: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+/* Glassmorphism */ --glass-bg: rgba(0, 0, 0, 0.5); --glass-border: rgba(255, 255, 255, 0.1);
+
+/* Original design system variables */ --background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #d4183d; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: transparent; --input-background: var(--color-surface); --switch-background: #cbced4; --font-weight-medium: 500; --font-weight-normal: 400; --ring: var(--color-primary); --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --radius: var(--radius-lg); --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+.dark { /* Light mode overrides */ --color-bg: #f8f9fa; --color-surface: #ffffff; --color-text: #1a1d23; --color-muted: #6c757d; --glass-bg: rgba(255, 255, 255, 0.7); --glass-border: rgba(0, 0, 0, 0.1);
+
+--background: var(--color-bg); --foreground: var(--color-text); --card: var(--glass-bg); --card-foreground: var(--color-text); --popover: var(--glass-bg); --popover-foreground: var(--color-text); --primary: var(--color-primary); --primary-foreground: #ffffff; --secondary: var(--color-surface); --secondary-foreground: var(--color-text); --muted: var(--color-surface); --muted-foreground: var(--color-muted); --accent: var(--color-surface); --accent-foreground: var(--color-text); --destructive: #dc3545; --destructive-foreground: #ffffff; --border: var(--glass-border); --input: var(--color-surface); --ring: var(--color-primary); --font-weight-medium: 500; --font-weight-normal: 400; --chart-1: var(--color-primary); --chart-2: var(--color-secondary); --chart-3: #22f792; --chart-4: #7652f5; --chart-5: #00f5db; --sidebar: var(--color-surface); --sidebar-foreground: var(--color-text); --sidebar-primary: var(--color-primary); --sidebar-primary-foreground: #ffffff; --sidebar-accent: var(--color-surface); --sidebar-accent-foreground: var(--color-text); --sidebar-border: var(--glass-border); --sidebar-ring: var(--color-primary); }
+
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-destructive: var(--destructive); --color-destructive-foreground: var(--destructive-foreground); --color-border: var(--border); --color-input: var(--input); --color-input-background: var(--input-background); --color-switch-background: var(--switch-background); --color-ring: var(--ring); --color-chart-1: var(--chart-1); --color-chart-2: var(--chart-2); --color-chart-3: var(--chart-3); --color-chart-4: var(--chart-4); --color-chart-5: var(--chart-5); --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); --radius-xl: calc(var(--radius) + 4px); --color-sidebar: var(--sidebar); --color-sidebar-foreground: var(--sidebar-foreground); --color-sidebar-primary: var(--sidebar-primary); --color-sidebar-primary-foreground: var(--sidebar-primary-foreground); --color-sidebar-accent: var(--sidebar-accent); --color-sidebar-accent-foreground: var(--sidebar-accent-foreground); --color-sidebar-border: var(--sidebar-border); --color-sidebar-ring: var(--sidebar-ring); }
+
+@layer base {
+
+{ @apply border-border outline-ring/50; box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-aclonica); }
+html, body { margin: 0; padding: 0; transition: all 0.4s ease-in-out; font-family: var(--font-aclonica); }
+
+body { @apply bg-background text-foreground; } }
+
+/* Portfolio-lite Glass Card System */ .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: transform 0.3s ease, box-shadow 0.3s ease; }
+
+.glass-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0, 255, 238, 0.15), var(--shadow-lg); border-color: var(--color-primary); }
+
+/* Portfolio-lite Button System */ .portfolio-btn { background-image: var(--gradient-light-to-dark-blue); box-shadow: 0 4px 15px 0 rgba(56, 152, 255, 0.5); font-weight: 700; text-align: center; border: none; background-size: 300% 100%; border-radius: var(--radius-xl); transition: all 0.4s ease-in-out; position: relative; z-index: 1; color: white; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); cursor: pointer; letter-spacing: 0.5px; }
+
+.portfolio-btn:hover { background-position: 100% 0; filter: brightness(1.1); }
+
+.portfolio-btn-secondary { background-image: var(--gradient-blue-to-purple) !important; box-shadow: 0 4px 15px 0 rgba(20, 165, 255, 0.6); color: white !important; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); }
+
+/* Improved contrast for text on bright backgrounds / .glass-card [style="background: var(--gradient-green-to-blue)"] { color: #1a1d23 !important; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3); }
+
+.glass-card [style*="background: var(--gradient-green-to-blue)"] .lucide { color: #1a1d23 !important; }
+
+/* Gradient Text Effects - Dark Mode */ .gradient-text-primary { background: var(--gradient-light-to-dark-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-secondary { background: var(--gradient-cyan-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+.gradient-text-accent { background: var(--gradient-green-to-blue); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Gradient Text Effects - Light Mode (softer, more muted for reduced eye strain) */ .dark .gradient-text-primary { background: linear-gradient(145deg, #6b46c1, #4a90e2, #5b7ec8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-secondary { background: linear-gradient(145deg, #8b5cf6, #6366f1, #3b82f6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+.dark .gradient-text-accent { background: linear-gradient(145deg, #4f7ab8, #3b82f6, #0ea5e9); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; opacity: 0.9; }
+
+/**
+
+Base typography. This is not applied to elements which have an ancestor with a Tailwind text class. / @layer base { :where(:not(:has([class=" text-"]), :not(:has([class^="text-"])))) { h1 { font-size: var(--text-2xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h2 { font-size: var(--text-xl); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h3 { font-size: var(--text-lg); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+h4 { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+p { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); }
+
+label { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+button { font-size: var(--text-base); font-weight: var(--font-weight-medium); line-height: 1.5; font-family: var(--font-aclonica); }
+
+input { font-size: var(--text-base); font-weight: var(--font-weight-normal); line-height: 1.5; font-family: var(--font-aclonica); } } }
+
+html { font-size: var(--font-size); }
+
+Hodgkin-Huxley & ODE Analysis Platform
+
+🧠 Hodgkin-Huxley Model
+
+
+📊 ODE Phase Analysis
+
+Hodgkin-Huxley Neuron Model
+Educational Content Area
+This section will contain information about the Hodgkin-Huxley model, its biological significance, and mathematical formulation.
+
+Model Parameters
+Membrane Properties
+
+Membrane Capacitance (μF/cm²)
+
+0.50
+2.00
+Maximum Conductances
+
+Sodium Conductance (mS/cm²)
+
+50
+200
+Potassium Conductance (mS/cm²)
+
+10
+50
+Leak Conductance (mS/cm²)
+
+0.10
+1.00
+Reversal Potentials
+
+Sodium Reversal Potential (mV)
+
+40
+70
+Potassium Reversal Potential (mV)
+
+-100
+-60
+Leak Reversal Potential (mV)
+
+-70.00
+-50.00
+Stimulation
+
+Applied Current (μA/cm²)
+
+-50
+100
+Simulation Duration (ms)
+
+10
+200
+
+KeyError: 'axes.grid.alpha is not a valid rc parameter (see rcParams.keys() for a list of valid parameters)'
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/app.py", line 382, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 143, in main
+    hodgkin_huxley_interface()
+File "/home/runner/workspace/app.py", line 202, in hodgkin_huxley_interface
+    setup_plot_theme()
+File "/home/runner/workspace/plot_styling.py", line 41, in setup_plot_theme
+    mpl.rcParams.update({
+File "<frozen _collections_abc>", line 949, in update
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/matplotlib/__init__.py", line 777, in __setitem__
+    raise KeyError(
+
+=== hh_model.py ===
+
+import numpy as np
+from scipy.integrate import solve_ivp
+
+class HodgkinHuxleySimulator:
+    """Hodgkin-Huxley neuron model simulator"""
+    
+    def __init__(self, C_m=1.0, g_Na=120, g_K=36, g_L=0.3, E_Na=50, E_K=-77, E_L=-54.387):
+        """
+        Initialize HH model parameters
+        
+        Parameters:
+        - C_m: membrane capacitance (μF/cm²)
+        - g_Na, g_K, g_L: maximum conductances (mS/cm²)
+        - E_Na, E_K, E_L: reversal potentials (mV)
+        """
+        self.C_m = C_m
+        self.g_Na = g_Na
+        self.g_K = g_K
+        self.g_L = g_L
+        self.E_Na = E_Na
+        self.E_K = E_K
+        self.E_L = E_L
+    
+    def alpha_n(self, V):
+        """Potassium activation rate constant"""
+        return 0.01 * (V + 55) / (1 - np.exp(-(V + 55) / 10))
+    
+    def beta_n(self, V):
+        """Potassium deactivation rate constant"""
+        return 0.125 * np.exp(-(V + 65) / 80)
+    
+    def alpha_m(self, V):
+        """Sodium activation rate constant"""
+        return 0.1 * (V + 40) / (1 - np.exp(-(V + 40) / 10))
+    
+    def beta_m(self, V):
+        """Sodium deactivation rate constant"""
+        return 4 * np.exp(-(V + 65) / 18)
+    
+    def alpha_h(self, V):
+        """Sodium inactivation rate constant"""
+        return 0.07 * np.exp(-(V + 65) / 20)
+    
+    def beta_h(self, V):
+        """Sodium deinactivation rate constant"""
+        return 1 / (1 + np.exp(-(V + 35) / 10))
+    
+    def hh_derivatives(self, t, y, I_ext):
+        """
+        HH model differential equations
+        
+        State variables: [V, n, m, h]
+        """
+        V, n, m, h = y
+        
+        # Rate constants
+        an = self.alpha_n(V)
+        bn = self.beta_n(V)
+        am = self.alpha_m(V)
+        bm = self.beta_m(V)
+        ah = self.alpha_h(V)
+        bh = self.beta_h(V)
+        
+        # Ionic currents
+        I_Na = self.g_Na * m**3 * h * (V - self.E_Na)
+        I_K = self.g_K * n**4 * (V - self.E_K)
+        I_L = self.g_L * (V - self.E_L)
+        
+        # Derivatives
+        dV_dt = (I_ext - I_Na - I_K - I_L) / self.C_m
+        dn_dt = an * (1 - n) - bn * n
+        dm_dt = am * (1 - m) - bm * m
+        dh_dt = ah * (1 - h) - bh * h
+        
+        return [dV_dt, dn_dt, dm_dt, dh_dt]
+    
+    def simulate(self, I_ext, duration, dt=0.01):
+        """
+        Run HH simulation
+        
+        Parameters:
+        - I_ext: applied current (μA/cm²)
+        - duration: simulation time (ms)
+        - dt: time step (ms)
+        
+        Returns:
+        - Dictionary with time series data
+        """
+        # Time vector
+        t_span = (0, duration)
+        t_eval = np.arange(0, duration + dt, dt)
+        
+        # Initial conditions (resting state)
+        V_rest = -65  # mV
+        n_inf = self.alpha_n(V_rest) / (self.alpha_n(V_rest) + self.beta_n(V_rest))
+        m_inf = self.alpha_m(V_rest) / (self.alpha_m(V_rest) + self.beta_m(V_rest))
+        h_inf = self.alpha_h(V_rest) / (self.alpha_h(V_rest) + self.beta_h(V_rest))
+        
+        y0 = [V_rest, n_inf, m_inf, h_inf]
+        
+        # Solve ODE
+        sol = solve_ivp(
+            lambda t, y: self.hh_derivatives(t, y, I_ext),
+            t_span, y0, t_eval=t_eval, method='RK45', rtol=1e-6
+        )
+        
+        return {
+            't': sol.t,
+            'V': sol.y[0],
+            'n': sol.y[1],
+            'm': sol.y[2],
+            'h': sol.y[3]
+        }
+    
+    def compute_currents(self, results):
+        """Compute ionic currents from simulation results"""
+        V = results['V']
+        n = results['n']
+        m = results['m']
+        h = results['h']
+        
+        I_Na = self.g_Na * m**3 * h * (V - self.E_Na)
+        I_K = self.g_K * n**4 * (V - self.E_K)
+        I_L = self.g_L * (V - self.E_L)
+        
+        return {
+            'I_Na': I_Na,
+            'I_K': I_K,
+            'I_L': I_L
+        }
+    
+    def simulate_pulse_train(self, pulse_params, total_duration, dt=0.01):
+        """
+        Run HH simulation with pulse train stimulus
+        
+        Parameters:
+        - pulse_params: dict with 'n_pulses', 'start', 'duration', 'interval', 'amplitude'
+        - total_duration: total simulation time (ms)
+        - dt: time step (ms)
+        
+        Returns:
+        - Dictionary with time series data and pulse timing info
+        """
+        # Time vector
+        t_span = (0, total_duration)
+        t_eval = np.arange(0, total_duration + dt, dt)
+        
+        # Initial conditions (resting state)
+        V_rest = -65  # mV
+        n_inf = self.alpha_n(V_rest) / (self.alpha_n(V_rest) + self.beta_n(V_rest))
+        m_inf = self.alpha_m(V_rest) / (self.alpha_m(V_rest) + self.beta_m(V_rest))
+        h_inf = self.alpha_h(V_rest) / (self.alpha_h(V_rest) + self.beta_h(V_rest))
+        
+        y0 = [V_rest, n_inf, m_inf, h_inf]
+        
+        # Create pulse train current function
+        def pulse_train_current(t):
+            I = 0
+            for i in range(pulse_params['n_pulses']):
+                pulse_start = pulse_params['start'] + i * pulse_params['interval']
+                pulse_end = pulse_start + pulse_params['duration']
+                if pulse_start <= t <= pulse_end:
+                    I = pulse_params['amplitude']
+                    break
+            return I
+        
+        # Solve ODE with pulse train
+        sol = solve_ivp(
+            lambda t, y: self.hh_derivatives(t, y, pulse_train_current(t)),
+            t_span, y0, t_eval=t_eval, method='RK45', rtol=1e-6
+        )
+        
+        # Store pulse timing for visualization
+        pulse_times = []
+        for i in range(pulse_params['n_pulses']):
+            pulse_start = pulse_params['start'] + i * pulse_params['interval']
+            pulse_end = pulse_start + pulse_params['duration']
+            pulse_times.append((pulse_start, pulse_end))
+        
+        return {
+            't': sol.t,
+            'V': sol.y[0],
+            'n': sol.y[1],
+            'm': sol.y[2],
+            'h': sol.y[3],
+            'pulse_times': pulse_times,
+            'pulse_amplitude': pulse_params['amplitude']
+        }
+    
+    def nullclines(self, V_range=(-100, 50), n_points=1000):
+        """Compute V and n nullclines for phase plane analysis"""
+        V = np.linspace(V_range[0], V_range[1], n_points)
+        
+        # V-nullcline (dV/dt = 0)
+        # This requires solving for the equilibrium condition
+        # For simplicity, we'll compute it numerically
+        
+        # n-nullcline (dn/dt = 0)
+        n_null = self.alpha_n(V) / (self.alpha_n(V) + self.beta_n(V))
+        
+        return V, n_null
+
+
+=== ode_analysis.py ===
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
+from plot_styling import setup_plot_theme, get_theme_colors
+
+class ODEAnalyzer:
+    """ODE phase portrait and bifurcation analysis tools"""
+    
+    def __init__(self):
+        self.colors = get_theme_colors()
+    
+    def van_der_pol(self, t, y, mu):
+        """Van der Pol oscillator: d²x/dt² - μ(1-x²)dx/dt + x = 0"""
+        x, dx_dt = y
+        d2x_dt2 = mu * (1 - x**2) * dx_dt - x
+        return [dx_dt, d2x_dt2]
+    
+    def lotka_volterra(self, t, y, alpha, beta, gamma, delta):
+        """Lotka-Volterra predator-prey model"""
+        x, y_prey = y  # x = prey, y = predator
+        dx_dt = alpha * x - beta * x * y_prey
+        dy_dt = delta * x * y_prey - gamma * y_prey
+        return [dx_dt, dy_dt]
+    
+    def duffing_oscillator(self, t, y, a, b, c):
+        """Duffing oscillator: d²x/dt² + c*dx/dt + a*x + b*x³ = 0"""
+        x, dx_dt = y
+        d2x_dt2 = -c * dx_dt - a * x - b * x**3
+        return [dx_dt, d2x_dt2]
+    
+    def pendulum(self, t, y, b, g):
+        """Damped pendulum: d²θ/dt² + b*dθ/dt + (g/l)*sin(θ) = 0"""
+        theta, dtheta_dt = y
+        d2theta_dt2 = -b * dtheta_dt - g * np.sin(theta)
+        return [dtheta_dt, d2theta_dt2]
+    
+    def get_system_function(self, system_type, params):
+        """Get the appropriate ODE system function"""
+        if system_type == "Van der Pol Oscillator":
+            return lambda t, y: self.van_der_pol(t, y, params['mu'])
+        elif system_type == "Lotka-Volterra":
+            return lambda t, y: self.lotka_volterra(
+                t, y, params['alpha'], params['beta'], params['gamma'], params['delta']
+            )
+        elif system_type == "Duffing Oscillator":
+            return lambda t, y: self.duffing_oscillator(
+                t, y, params['a'], params['b'], params['c']
+            )
+        elif system_type == "Pendulum":
+            return lambda t, y: self.pendulum(t, y, params['b'], params['g'])
+        else:
+            # Default system for demonstration
+            return lambda t, y: [y[1], -y[0]]
+    
+    def plot_phase_portrait(self, system_type, params, x_range, y_range, n_trajectories):
+        """Generate phase portrait for 2D ODE system"""
+        setup_plot_theme()
+        
+        fig, ax = plt.subplots(figsize=(10, 8))
+        
+        # Get system function
+        system_func = self.get_system_function(system_type, params)
+        
+        # Create meshgrid for vector field
+        x_grid = np.linspace(-x_range, x_range, 20)
+        y_grid = np.linspace(-y_range, y_range, 20)
+        X, Y = np.meshgrid(x_grid, y_grid)
+        
+        # Compute vector field
+        DX = np.zeros_like(X)
+        DY = np.zeros_like(Y)
+        
+        for i in range(X.shape[0]):
+            for j in range(X.shape[1]):
+                derivatives = system_func(0, [X[i,j], Y[i,j]])
+                DX[i,j] = derivatives[0]
+                DY[i,j] = derivatives[1]
+        
+        # Normalize vectors for better visualization
+        M = np.sqrt(DX**2 + DY**2)
+        M[M == 0] = 1  # Avoid division by zero
+        DX_norm = DX / M
+        DY_norm = DY / M
+        
+        # Plot vector field
+        ax.quiver(X, Y, DX_norm, DY_norm, 
+                 alpha=0.6, color=self.colors['muted'], width=0.003)
+        
+        # Generate trajectories
+        colors_cycle = [
+            self.colors['primary'], self.colors['secondary'], 
+            self.colors['accent'], self.colors['chart_3'], 
+            self.colors['chart_5']
+        ]
+        
+        for i in range(n_trajectories):
+            # Random initial conditions
+            x0 = np.random.uniform(-x_range*0.8, x_range*0.8)
+            y0 = np.random.uniform(-y_range*0.8, y_range*0.8)
+            
+            # Solve ODE
+            sol = solve_ivp(
+                system_func, 
+                [0, 20], 
+                [x0, y0], 
+                dense_output=True, 
+                rtol=1e-8
+            )
+            
+            if sol.success:
+                t_plot = np.linspace(0, sol.t[-1], 1000)
+                trajectory = sol.sol(t_plot)
+                
+                color = colors_cycle[i % len(colors_cycle)]
+                ax.plot(trajectory[0], trajectory[1], 
+                       color=color, linewidth=2, alpha=0.8)
+                
+                # Mark starting point
+                ax.plot(x0, y0, 'o', color=color, markersize=6, 
+                       markeredgecolor='white', markeredgewidth=1)
+        
+        # Styling
+        ax.set_xlim(-x_range, x_range)
+        ax.set_ylim(-y_range, y_range)
+        ax.set_xlabel(r'$x$', fontfamily='Aclonica', fontsize=14)
+        ax.set_ylabel(r'$y$', fontfamily='Aclonica', fontsize=14)
+        ax.set_title(f'Phase Portrait: {system_type}', 
+                    fontfamily='Aclonica', fontweight='bold', fontsize=16)
+        ax.grid(True, alpha=0.3)
+        ax.axhline(y=0, color='white', linestyle='-', alpha=0.3)
+        ax.axvline(x=0, color='white', linestyle='-', alpha=0.3)
+        
+        return fig
+    
+    def logistic_map_bifurcation(self, r_range, resolution):
+        """Compute bifurcation diagram for logistic map"""
+        r_min, r_max = r_range
+        r_values = np.linspace(r_min, r_max, resolution)
+        
+        # Parameters for iteration
+        n_skip = 1000  # Skip transient behavior
+        n_plot = 100   # Points to plot after transient
+        
+        r_plot = []
+        x_plot = []
+        
+        for r in r_values:
+            # Initial condition
+            x = 0.5
+            
+            # Skip transients
+            for _ in range(n_skip):
+                x = r * x * (1 - x)
+            
+            # Collect points
+            for _ in range(n_plot):
+                x = r * x * (1 - x)
+                r_plot.append(r)
+                x_plot.append(x)
+        
+        return np.array(r_plot), np.array(x_plot)
+    
+    def pitchfork_bifurcation(self, r_range, resolution):
+        """Compute pitchfork bifurcation: dx/dt = rx - x³"""
+        r_values = np.linspace(r_range[0], r_range[1], resolution)
+        
+        # Analytical solution for equilibrium points
+        r_plot = []
+        x_plot = []
+        
+        for r in r_values:
+            if r <= 0:
+                # Only stable equilibrium at x = 0
+                r_plot.append(r)
+                x_plot.append(0)
+            else:
+                # Three equilibria: x = 0, ±√r
+                equilibria = [0, np.sqrt(r), -np.sqrt(r)]
+                for eq in equilibria:
+                    r_plot.append(r)
+                    x_plot.append(eq)
+        
+        return np.array(r_plot), np.array(x_plot)
+    
+    def hopf_bifurcation_system(self, mu_range, resolution):
+        """Compute Hopf bifurcation for system: dx/dt = μx - y - x(x²+y²), dy/dt = x + μy - y(x²+y²)"""
+        mu_values = np.linspace(mu_range[0], mu_range[1], resolution)
+        
+        mu_plot = []
+        amplitude_plot = []
+        
+        for mu in mu_values:
+            if mu <= 0:
+                # Stable equilibrium at origin
+                mu_plot.append(mu)
+                amplitude_plot.append(0)
+            else:
+                # Limit cycle with amplitude √μ
+                mu_plot.append(mu)
+                amplitude_plot.append(np.sqrt(mu))
+                mu_plot.append(mu)
+                amplitude_plot.append(-np.sqrt(mu))
+        
+        return np.array(mu_plot), np.array(amplitude_plot)
+    
+    def saddle_node_bifurcation(self, r_range, resolution):
+        """Compute saddle-node bifurcation: dx/dt = r + x²"""
+        r_values = np.linspace(r_range[0], r_range[1], resolution)
+        
+        r_plot = []
+        x_plot = []
+        
+        for r in r_values:
+            if r <= 0:
+                # Two equilibria: x = ±√(-r)
+                equilibria = [np.sqrt(-r), -np.sqrt(-r)]
+                for eq in equilibria:
+                    r_plot.append(r)
+                    x_plot.append(eq)
+            # For r > 0, no real equilibria
+        
+        return np.array(r_plot), np.array(x_plot)
+    
+    def plot_bifurcation_diagram(self, bifurc_type, param_range, resolution):
+        """Generate bifurcation diagram"""
+        setup_plot_theme()
+        
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        if bifurc_type == "Logistic Map":
+            param_vals, var_vals = self.logistic_map_bifurcation(param_range, resolution)
+            param_label = r'$r$'
+            var_label = r'$x$'
+            title = 'Logistic Map Bifurcation Diagram'
+            ax.scatter(param_vals, var_vals, s=0.1, c=self.colors['primary'], alpha=0.6)
+            
+        elif bifurc_type == "Pitchfork Bifurcation":
+            param_vals, var_vals = self.pitchfork_bifurcation(param_range, resolution)
+            param_label = r'$r$'
+            var_label = r'$x^*$'
+            title = 'Pitchfork Bifurcation Diagram'
+            ax.plot(param_vals, var_vals, '.', color=self.colors['secondary'], markersize=2)
+            
+        elif bifurc_type == "Hopf Bifurcation":
+            param_vals, var_vals = self.hopf_bifurcation_system(param_range, resolution)
+            param_label = r'$\mu$'
+            var_label = 'Amplitude'
+            title = 'Hopf Bifurcation Diagram'
+            ax.plot(param_vals, var_vals, '.', color=self.colors['accent'], markersize=2)
+            
+        elif bifurc_type == "Saddle-Node Bifurcation":
+            param_vals, var_vals = self.saddle_node_bifurcation(param_range, resolution)
+            param_label = r'$r$'
+            var_label = r'$x^*$'
+            title = 'Saddle-Node Bifurcation Diagram'
+            ax.plot(param_vals, var_vals, '.', color=self.colors['chart_3'], markersize=2)
+        
+        # Styling
+        ax.set_xlabel(param_label, fontfamily='Aclonica', fontsize=14)
+        ax.set_ylabel(var_label, fontfamily='Aclonica', fontsize=14)
+        ax.set_title(title, fontfamily='Aclonica', fontweight='bold', fontsize=16)
+        ax.grid(True, alpha=0.3)
+        
+        # Add vertical line at bifurcation point if applicable
+        if bifurc_type in ["Pitchfork Bifurcation", "Hopf Bifurcation", "Saddle-Node Bifurcation"]:
+            ax.axvline(x=0, color=self.colors['chart_5'], linestyle='--', alpha=0.8, linewidth=2)
+        
+        return fig
+
+
+=== plot_styling.py ===
+
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib import font_manager
+import numpy as np
+
+def get_theme_colors():
+    """Get color palette matching the CSS theme"""
+    return {
+        'bg': '#0d1117',
+        'surface': '#161b22',
+        'primary': '#6930c3',
+        'secondary': '#80ffdb',
+        'text': '#f5f5f5',  # whitesmoke
+        'muted': '#8b949e',
+        'link': '#7400b8',
+        'link_hover': '#56cfe1',
+        'math': '#64dfdf',
+        'accent': '#72efdd',
+        'chart_3': '#72efdd',
+        'chart_4': '#5e60ce',
+        'chart_5': '#48bfe3'
+    }
+
+def get_gradients():
+    """Get gradient definitions matching the CSS theme"""
+    return {
+        'light_to_dark_blue': ['#5390d9', '#4ea8de', '#48bfe3', '#56cfe1'],
+        'cyan_to_blue': ['#80ffdb', '#48bfe3'],
+        'purple_to_cyan': ['#7400b8', '#6930c3', '#5e60ce', '#80ffdb'],
+        'blue_to_purple': ['#7400b8', '#6930c3', '#5e60ce', '#5390d9']
+    }
+
+def setup_plot_theme():
+    """Configure matplotlib to match the theme"""
+    colors = get_theme_colors()
+    
+    # Set the style parameters
+    plt.style.use('dark_background')
+    
+    # Custom rcParams
+    mpl.rcParams.update({
+        # Figure settings
+        'figure.facecolor': colors['bg'],
+        'figure.edgecolor': colors['bg'],
+        'savefig.facecolor': colors['bg'],
+        'savefig.edgecolor': colors['bg'],
+        
+        # Axes settings
+        'axes.facecolor': colors['bg'],
+        'axes.edgecolor': colors['muted'],
+        'axes.labelcolor': colors['text'],
+        'axes.spines.left': True,
+        'axes.spines.bottom': True,
+        'axes.spines.top': False,
+        'axes.spines.right': False,
+        'axes.linewidth': 1.5,
+        'axes.grid': True,
+        'axes.labelsize': 12,
+        'axes.titlesize': 14,
+        'axes.titleweight': 'bold',
+        
+        # Grid settings
+        'grid.color': colors['muted'],
+        'grid.alpha': 0.3,
+        'grid.linewidth': 0.8,
+        
+        # Tick settings
+        'xtick.color': colors['text'],
+        'ytick.color': colors['text'],
+        'xtick.labelsize': 10,
+        'ytick.labelsize': 10,
+        'xtick.direction': 'out',
+        'ytick.direction': 'out',
+        
+        # Font settings - Use system fonts since we can't load custom fonts easily
+        'font.family': 'sans-serif',
+        'font.sans-serif': ['DejaVu Sans', 'Arial', 'Helvetica', 'sans-serif'],
+        'font.size': 11,
+        
+        # Line settings
+        'lines.linewidth': 2.0,
+        'lines.markersize': 6,
+        
+        # Legend settings
+        'legend.facecolor': colors['surface'],
+        'legend.edgecolor': colors['muted'],
+        'legend.fontsize': 10,
+        'legend.framealpha': 0.9,
+        
+        # Text settings
+        'text.color': colors['text'],
+        
+        # Math text settings (for equations)
+        'mathtext.default': 'regular',
+        'mathtext.fontset': 'cm',  # Computer Modern for math
+    })
+
+def create_gradient_colormap(gradient_name='light_to_dark_blue', n_colors=256):
+    """Create a matplotlib colormap from theme gradients"""
+    gradients = get_gradients()
+    
+    if gradient_name not in gradients:
+        gradient_name = 'light_to_dark_blue'
+    
+    colors = gradients[gradient_name]
+    
+    # Convert hex colors to RGB
+    rgb_colors = []
+    for color in colors:
+        # Remove # if present
+        color = color.lstrip('#')
+        # Convert to RGB tuple (0-1 range)
+        rgb = tuple(int(color[i:i+2], 16)/255.0 for i in (0, 2, 4))
+        rgb_colors.append(rgb)
+    
+    # Create colormap
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap = LinearSegmentedColormap.from_list(gradient_name, rgb_colors, N=n_colors)
+    
+    return cmap
+
+def apply_theme_to_axis(ax, title=None, xlabel=None, ylabel=None):
+    """Apply theme styling to a matplotlib axis"""
+    colors = get_theme_colors()
+    
+    # Set face and edge colors
+    ax.set_facecolor(colors['bg'])
+    
+    # Configure spines
+    for spine in ax.spines.values():
+        spine.set_color(colors['muted'])
+        spine.set_linewidth(1.5)
+    
+    # Hide top and right spines
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    
+    # Configure ticks
+    ax.tick_params(colors=colors['text'], which='both')
+    
+    # Configure grid
+    ax.grid(True, alpha=0.3, color=colors['muted'])
+    
+    # Set labels and title
+    if title:
+        ax.set_title(title, color=colors['text'], fontweight='bold', fontsize=14)
+    if xlabel:
+        ax.set_xlabel(xlabel, color=colors['text'], fontsize=12)
+    if ylabel:
+        ax.set_ylabel(ylabel, color=colors['text'], fontsize=12)
+
+def get_color_cycle():
+    """Get a color cycle that matches the theme"""
+    colors = get_theme_colors()
+    return [
+        colors['primary'],
+        colors['secondary'],
+        colors['accent'],
+        colors['chart_3'],
+        colors['chart_4'],
+        colors['chart_5'],
+        colors['link'],
+        colors['math']
+    ]
+
+def style_math_text(text, color='math'):
+    """Style mathematical text with appropriate font and color"""
+    colors = get_theme_colors()
+    color_val = colors.get(color, colors['math'])
+    
+    # For matplotlib, we can use mathtext
+    return f'${text}$'
+
+def create_themed_figure(figsize=(10, 6), nrows=1, ncols=1):
+    """Create a figure with theme styling applied"""
+    setup_plot_theme()
+    
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize)
+    
+    # Apply theme to axes
+    if nrows * ncols == 1:
+        axes = [axes]  # Make it a list for consistency
+    elif nrows == 1 or ncols == 1:
+        axes = axes.flatten()
+    else:
+        axes = axes.flatten()
+    
+    for ax in axes:
+        apply_theme_to_axis(ax)
+    
+    # Return single axis if only one subplot
+    if len(axes) == 1:
+        return fig, axes[0]
+    else:
+        return fig, axes
+
+
+=== pyproject.toml ===
+
+[project]
+name = "repl-nix-workspace"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.10.6",
+    "numpy>=2.3.3",
+    "scipy>=1.16.2",
+    "streamlit>=1.50.0",
+]
+
+
+=== repo-summary.py ===
+
+#!/usr/bin/env python3
+"""
+repo-to-txt.py
+Create a clean, LLM-friendly text snapshot of a repository:
+- Directory tree (depth-limited)
+- Source file contents
+- Optional repo intent
+- Notebook summaries instead of raw JSON
+Run from repo root:
+    python repo-to-txt.py
+"""
+
+from pathlib import Path
+
+# =====================
+# Configuration
+# =====================
+
+OUTPUT_FILE = "snapshot.txt"
+MAX_FILE_SIZE = 200_000  # bytes
+TREE_DEPTH = 3
+
+INCLUDE_EXTS = {
+    ".md", ".py", ".txt", ".yml", ".yaml", ".json", ".toml"
+}
+
+EXCLUDE_DIRS = {
+    ".git",
+    "__pycache__",
+    ".venv",
+    "node_modules",
+    ".ipynb_checkpoints",
+    ".egg-info",
+    "build",
+    "dist",
+}
+
+# Explicitly exclude generated snapshots / prompts
+EXCLUDE_FILES = {
+    "snapshot.txt",
+    "prompt.txt",
+    "repo_snapshot.txt",
+}
+
+REPO_INTENT_FILE = "REPO_INTENT.txt"
+
+NOTEBOOK_SUMMARIES = {
+    # "notebooks/demo.ipynb": "Notebook demonstrating training loop and visualization."
+}
+
+# =====================
+# Helpers
+# =====================
+
+def is_excluded(path: Path) -> bool:
+    return any(part in EXCLUDE_DIRS for part in path.parts)
+
+
+def is_text_file(path: Path) -> bool:
+    return (
+        path.is_file()
+        and path.suffix in INCLUDE_EXTS
+        and path.stat().st_size < MAX_FILE_SIZE
+    )
+
+
+def load_repo_intent() -> str:
+    path = Path(REPO_INTENT_FILE)
+    if path.exists():
+        return path.read_text(encoding="utf-8").strip()
+    return ""
+
+
+def print_tree(root: Path, depth: int) -> str:
+    lines = []
+    for path in sorted(root.rglob("*")):
+        if is_excluded(path):
+            continue
+        rel = path.relative_to(root)
+        if len(rel.parts) <= depth:
+            indent = "  " * (len(rel.parts) - 1)
+            lines.append(f"{indent}{path.name}")
+    return "\n".join(lines)
+
+
+def write_section(out, title: str):
+    out.write(f"## {title}\n\n")
+
+
+# =====================
+# Main
+# =====================
+
+def main():
+    repo = Path(".").resolve()
+
+    with open(OUTPUT_FILE, "w", encoding="utf-8") as out:
+        out.write("# Repository Snapshot\n\n")
+
+        write_section(out, "Repo Intent (author-provided)")
+        intent = load_repo_intent()
+        out.write((intent if intent else "[No repo intent provided]") + "\n\n")
+
+        write_section(out, "Directory Tree")
+        out.write(print_tree(repo, TREE_DEPTH) + "\n\n")
+
+        write_section(out, "Files")
+
+        for file in sorted(repo.rglob("*")):
+            if is_excluded(file):
+                continue
+            if file.name in EXCLUDE_FILES:
+                continue
+
+            rel = file.relative_to(repo)
+
+            # Notebook handling
+            if file.suffix == ".ipynb":
+                summary = NOTEBOOK_SUMMARIES.get(
+                    str(rel),
+                    "Jupyter notebook (content omitted; JSON format)."
+                )
+                out.write(f"\n\n=== {rel} (summary) ===\n\n{summary}\n")
+                continue
+
+            # Text files
+            if is_text_file(file):
+                out.write(f"\n\n=== {rel} ===\n\n")
+                try:
+                    out.write(file.read_text(encoding="utf-8"))
+                except UnicodeDecodeError:
+                    out.write("[Skipped: encoding error]")
+
+    print(f"Saved snapshot to {OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    main()
